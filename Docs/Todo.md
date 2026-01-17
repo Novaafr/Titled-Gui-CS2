@@ -2,7 +2,7 @@
 Fix trigger bot
 
 # Middle Ground
-VPK or any other better visual check that supports occulusion checking
+Gernade Helper
 
 # Least Important
 Bhop Using Keyboard Input,

@@ -1,4 +1,5 @@
 ﻿using SharpGen.Runtime.Win32;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Titled_Gui.Classes;
 using Titled_Gui.Data.Game;
@@ -33,14 +34,14 @@ namespace Titled_Gui.Modules.Legit
 
             if (Fflag == 65665 || Fflag == 65667)
             {
-                Console.WriteLine(Fflag);
+                //Console.WriteLine(Fflag);
                 GameState.swed.WriteInt(GameState.client + Offsets.jump, 65537); // write the value to ForceJump to make the player jump
-                Thread.Sleep(15); // sleep 
+                Thread.Sleep(2); // sleep 
             }
             else
             { 
                 GameState.swed.WriteInt(GameState.client+Offsets.jump, 256); // unfoprce the jump
-                Thread.Sleep(15); //sleep
+                Thread.Sleep(2); //sleep
             }
             //lastJumped = now;
 

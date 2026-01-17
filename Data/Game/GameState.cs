@@ -1,5 +1,6 @@
 using ImGuiNET;
 using Swed64;
+using Titled_Gui.Data.Entity;
 
 namespace Titled_Gui.Data.Game
 {
@@ -36,5 +37,6 @@ namespace Titled_Gui.Data.Game
         public static int roundKills { get; set; }
         public static int RoundDamage { get; set; }
         public static IntPtr bulletServices { get; set; }
+        public static List<WorldEntity> worldEntities { get; set; } = [];
     }
 }

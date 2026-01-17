@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using NAudio.SoundFont;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -12,43 +13,80 @@ namespace Titled_Gui.Modules.Visual
     internal class SoundESP // TODO: animate and optimize
     {
         public static bool enabled = false;
-        public static Vector4 color = new(1, 1, 1, 1);
+        public static Vector4 teamColor = new(0, 1, 0, 1);
+        public static Vector4 enemyColor = new(1, 0, 0, 1);
+        private static Dictionary<Entity, float> emitTimes = []; // entity, emittime, timesincestart
 
+        private class point
+        {
+            public Vector2 Position { get; set; }
+            public float StartTime { get; set; }
+            public float LifeTime { get; set; }
+        }
         public static void DrawSoundESP(Entity e)
         {
-            if (!enabled || e == null || e.Health <= 0 || e.emitSoundTime < 1) return;
+            if (!enabled || e == null || e.Health <= 0) return;
+
+            if (!emitTimes.ContainsKey(e) || e.emitSoundTime > emitTimes[e])
+            {
+                emitTimes[e] = e.emitSoundTime;
+            }
+
+            if (e.emitSoundTime == emitTimes[e])
+                return;
+
+            //Console.WriteLine(e.emitSoundTime);
+            List<point> points = CreatePoints(e);
+
+            AnimateAndDrawPoints(points, e);
+        }
+        private static List<point> CreatePoints(Entity e)
+        {
+            List<point> points = new();
+            float radius = 7f;
+            float step = MathF.PI * 2 / 64;
             float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
 
-            Console.WriteLine(e.emitSoundTime);
-            float pi = MathF.PI;
-            float radius = 30f;
-            float step = pi * 2 / 64;
-            List<Vector2> points = new();
-
-            for (float lat = 0f; lat <= pi * 2.0f; lat += step)
+            for (float lat = 0f; lat <= MathF.PI * 2.0f; lat += step)
             {
+                Vector3 point = new(MathF.Sin(lat) * radius, MathF.Cos(lat) * radius, 0f);
+                Vector2 point2D = Calculate.WorldToScreen(viewMatrix, e.Position + point);
 
-                Vector3 point = new Vector3(MathF.Sin(lat) * radius, MathF.Cos(lat) * radius, 0f);
-                Vector2 point2D = Calculate.WorldToScreen(viewMatrix, e.Position + point, GameState.renderer.screenSize);
+                if (point2D == new Vector2(-99, -99)) continue;
 
-                if (point == new Vector3(0, 0, 0))
-                    continue;
-
-                if (point2D == new Vector2(0, 0))
-                    continue;
-
-                points.Add(new(point2D.X, point2D.Y));
-            }
-            if (points.Count > 1)
-            {
-                foreach (var point in points)
+                points.Add(new point
                 {
-                    var tempPoint = point;
-                    //GameState.renderer.drawList.AddPolyline(ref tempPoint, points.Count, ImGui.ColorConvertFloat4ToU32(color), ImGuiNET.ImDrawFlags.Closed, 0.5f);
-                    unsafe
+                    Position = point2D,
+                    StartTime = e.emitSoundTime,
+                    LifeTime = DateTime.Now.Second
+                });
+            }
+
+            return points;
+        }
+
+        private static void AnimateAndDrawPoints(List<point> points, Entity e)
+        {
+            foreach (var point in points)
+            {
+                float elapsedTime = DateTime.Now.Second - point.LifeTime;
+
+                float scale = elapsedTime;
+
+                uint color = ImGui.ColorConvertFloat4ToU32(new Vector4(teamColor.X, teamColor.Y, teamColor.Z, 1));
+                Vector2 tempPoint2D = point.Position;
+                List<Vector2> scaledPoints = [.. points.Select(p =>
+                {
+                    Vector2 scaledPoint = p.Position * 1;
+                    return scaledPoint;
+                })];
+                Vector2[] pointArray = scaledPoints.ToArray();
+
+                unsafe
+                {
+                    fixed (Vector2* pointPtr = pointArray)
                     {
-                        fixed (Vector2* pointa = points.ToArray())
-                            GameState.renderer.drawList.AddPolyline(ref *pointa, points.Count, ImGui.ColorConvertFloat4ToU32(color), ImDrawFlags.Closed, 2f);
+                        GameState.renderer.drawList.AddPolyline(ref *pointPtr, points.Count, ImGui.ColorConvertFloat4ToU32(teamColor), ImDrawFlags.Closed, 2f);
                     }
                 }
             }

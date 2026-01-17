@@ -1,13 +1,16 @@
 ﻿using ClickableTransparentOverlay;
 using ImGuiNET;
+using System.Diagnostics;
 using System.Media;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Titled_Gui.Classes;
 using Titled_Gui.Data.Entity;
 using Titled_Gui.Data.Game;
 using Titled_Gui.Modules.Legit;
 using Titled_Gui.Modules.Rage;
 using Titled_Gui.Modules.Visual;
+using static Titled_Gui.Data.Game.MapParser.MapLoader;
 
 namespace Titled_Gui
 {
@@ -81,7 +84,7 @@ namespace Titled_Gui
         ];
         private static bool menuSounds = true;
         private static float menuSoundsVolume = 0.8f;
-
+        private static bool _enableVsync = true;
 
         public void UpdateEntities(IEnumerable<Entity> newEntities) => entities = newEntities.ToList();
 
@@ -133,6 +136,7 @@ namespace Titled_Gui
                 io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;  // gamepad nav
                 io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
                 io.Framerate = 0;
+                this.VSync = _enableVsync;
                 io.ConfigViewportsNoAutoMerge = true;
                 io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -202,7 +206,7 @@ namespace Titled_Gui
         {
             if (ImGui.IsKeyPressed(OpenKey, false))
                 DrawWindow = !DrawWindow;
-            
+
             BGdrawList = ImGui.GetBackgroundDrawList();
             if (DrawWindow)
             {
@@ -335,14 +339,14 @@ namespace Titled_Gui
 
                     if (spacingHeight > 0)
                         ImGui.Dummy(new(0, spacingHeight));
-                    
+
 
                     Vector2 cogPos = ImGui.GetCursorScreenPos();
                     Vector2 cogSize = new(ImGui.GetContentRegionAvail().X, cogButtonHeight);
 
                     if (ImGui.InvisibleButton("##SettingsGear", cogSize))
                         selectedTab = 4;
-                    
+
 
                     bool isHovered = ImGui.IsItemHovered();
                     bool isSettingsSelected = selectedTab == 4;
@@ -352,13 +356,13 @@ namespace Titled_Gui
                     uint gearColor;
                     if (isSettingsSelected)
                         gearColor = ImGui.ColorConvertFloat4ToU32(accentColor);
-                    
+
                     else if (isHovered)
                         gearColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.9f, 0.9f, 0.9f, 1));
-                    
+
                     else
                         gearColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.6f, 0.6f, 1));
-                    
+
 
                     DrawGearIcon(gearCenter, gearColor);
                 }
@@ -460,6 +464,7 @@ namespace Titled_Gui
                             RenderColorSetting("Team Color", ref Colors.TeamColor);
                             RenderColorSetting("Enemy Color", ref Colors.EnemyColor);
                             RenderBoolSettingWith2ColorPickers("Outer Outline", ref BoxESP.OuterOutline, ref BoxESP.OutlineEnemyColor, ref BoxESP.OutlineTeamColor);
+                            RenderBoolSettingWith2ColorPickers("Visibility Check", ref BoneESP.visibilityCheck, ref BoxESP.occludedEnemy, ref BoxESP.occludedTeam);
                             //});
                             RenderBoolSetting("Flash Check", ref BoxESP.FlashCheck);
                             RenderBoolSetting("Enable Health Bar", ref Modules.Visual.HealthBar.EnableHealthBar);
@@ -493,12 +498,13 @@ namespace Titled_Gui
                             //}
                             RenderBoolSetting("Eye Ray", ref EyeRay.Enabled);
                             RenderBoolSettingWith1ColorPicker("Gun Icon", ref GunDisplay.Enabled, ref GunDisplay.TextColor);
+                            RenderBoolSettingWith2ColorPickers("Sound ESP", ref SoundESP.enabled, ref SoundESP.teamColor, ref SoundESP.enemyColor);
                             ImGui.EndChild();
 
                             ImGui.NextColumn();
                             ImGui.BeginChild("RightVisuals", ImGui.GetContentRegionAvail());
 
-                            float PreviewHeight = ImGui.GetContentRegionAvail().Y * 0.5f; 
+                            float PreviewHeight = ImGui.GetContentRegionAvail().Y * 0.5f;
                             ImGui.BeginChild("ESPPreviewSection", new(0, PreviewHeight));
 
                             RenderCategoryHeader("ESP Preview");
@@ -525,10 +531,10 @@ namespace Titled_Gui
                             RenderBoolSettingWith1ColorPicker("C4 Box ESP", ref C4ESP.BoxEnabled, ref C4ESP.BoxColor);
                             RenderBoolSettingWith1ColorPicker("C4 Text ESP", ref C4ESP.TextEnabled, ref C4ESP.TextColor);
 
-                            RenderBoolSettingWith1ColorPicker("Dropped Weapon ESP", ref WorldESP.DroppedWeaponESP, ref WorldESP.WeaponTextColor);
-                            RenderBoolSettingWith2ColorPickers("Dropped Hostage ESP", ref WorldESP.HostageESP, ref WorldESP.HostageTextColor, ref WorldESP.HostageBoxColor);
-                            RenderBoolSettingWith2ColorPickers("Chicken ESP", ref WorldESP.ChickenESP, ref WorldESP.ChickenTextColor, ref WorldESP.ChickenBoxColor);
-                            RenderBoolSettingWith1ColorPicker("Projectile ESP", ref WorldESP.ProjectileESP, ref WorldESP.ProjectileTextColor);
+                            RenderBoolSettingWith1ColorPicker("Dropped Weapon ESP", ref WorldESP.droppedWeaponESP, ref WorldESP.WeaponTextColor);
+                            RenderBoolSettingWith2ColorPickers("Dropped Hostage ESP", ref WorldESP.hostageESP, ref WorldESP.HostageTextColor, ref WorldESP.HostageBoxColor);
+                            RenderBoolSettingWith2ColorPickers("Chicken ESP", ref WorldESP.chickenESP, ref WorldESP.ChickenTextColor, ref WorldESP.ChickenBoxColor);
+                            RenderBoolSettingWith1ColorPicker("Projectile ESP", ref WorldESP.projectileESP, ref WorldESP.ProjectileTextColor);
                             ImGui.EndChild();
 
                             ImGui.EndChild();
@@ -598,6 +604,9 @@ namespace Titled_Gui
                             RenderKeybindChooser("Open Keybind", ref OpenKey);
                             RenderBoolSetting("Menu Sounds", ref menuSounds);
                             RenderFloatSlider("Menu Sounds Volume", ref menuSoundsVolume, 0, 1);
+                            ImGui.Text("Preformance");
+                            RenderBoolSetting("Use Old Visibility Check", ref EntityManager.useOldVisibilityCheck);
+                            RenderBoolSetting("VSync", ref _enableVsync);
                             ImGui.EndChild();
 
                             ImGui.NextColumn();
@@ -609,6 +618,8 @@ namespace Titled_Gui
                             ImGui.Text("About:");
                             ImGui.Text($"Titled GUI V{Configs.Version}");
                             ImGui.Text("External Cheat Made By xfi0 / domok.");
+                            ImGui.Text("More Info On" + Configs.Link);
+                            ImGui.Text("If You Paid For This You Have Been Scammed, This Never Was And Never Will Be Paid");
 
                             ImGui.EndChild();
 
@@ -619,12 +630,8 @@ namespace Titled_Gui
                 ImGui.EndChild();
 
                 ImGui.End();
-                RunAllModules();
             }
-            else
-            {
-                RunAllModules();
-            }
+            RunAllModules();
         }
         public void DrawParticles(int num)
         {
@@ -660,13 +667,13 @@ namespace Titled_Gui
                 }
             }
         }
-
-
-
+     
         public void RunAllModules()
         {
             try
             {
+                WorldESP.EntityESP();
+
                 if (Aimbot.targetLine)
                     Aimbot.RenderTargetLine();
                 HitStuff.CreateHitText();
@@ -1054,8 +1061,9 @@ namespace Titled_Gui
                 onChanged?.Invoke();
             }
         }
-        private static Dictionary<string, bool> openPopups = [];
-        private static Dictionary<string, bool> previousValues = [];
+        private static Dictionary<string, bool> openPopups = new Dictionary<string, bool>();
+        private static Dictionary<string, bool> previousValues = new Dictionary<string, bool>();
+
         private static void RenderBoolSettingWithWarning(string label, ref bool value, Action? onChanged = null, float widgetWidth = 0f)
         {
             if (!openPopups.ContainsKey(label))
@@ -1104,24 +1112,26 @@ namespace Titled_Gui
                 drawList.AddCircle(new Vector2(knobX, knobY), radius,
                     ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.08f, 0.3f)), 36, 1f);
             }, widgetWidth);
+
             string popupId = "warning##" + label;
             if (openPopups[label])
                 ImGui.OpenPopup(popupId);
-
-            bool tempref = openPopups[label];
-
-            //ImGui.SetNextWindowSize(new Vector2(200, 200));
-            if (ImGui.BeginPopupModal(popupId, ref tempref, ImGuiWindowFlags.AlwaysAutoResize))
+            var tempref = openPopups[label];
+            ImGui.SetNextWindowPos(GameState.renderer.screenSize / 2);
+            if (ImGui.BeginPopupModal(popupId, ref tempref, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove))
             {
-                ImGui.Text("WARNING\nThis feature uses WPM and or may be detected.\n Use at your own risk.");
+                ImGui.Text("WARNING\nThis feature uses WPM and may be detected.\nUse at your own risk.");
                 ImGui.Separator();
                 if (ImGui.Button("OK", new Vector2(120, 0)))
-                    openPopups[label] = false; ImGui.CloseCurrentPopup();
-                
-
+                {
+                    openPopups[label] = false;
+                    ImGui.CloseCurrentPopup();
+                }
                 ImGui.EndPopup();
             }
+
             previousValues[label] = temp;
+
             if (temp != value)
             {
                 value = temp;
@@ -1165,6 +1175,11 @@ namespace Titled_Gui
 
             ImGui.PopID();
         }
+        private static void ColorEdit(string lable,  ref Vector4 col, ImGuiColorEditFlags flags)
+        {
+            // TODO: make a custom color picker with options like gradient and stuff
+            ImGui.ColorEdit4(lable, ref col, flags);
+        }
         private static void RenderBoolSettingWith1ColorPicker(string label, ref bool value, ref Vector4 color1)
         {
             ImGui.PushID(label);
@@ -1179,7 +1194,7 @@ namespace Titled_Gui
                 float paddingRight = 7f; 
 
                 ImGui.SetCursorScreenPos(rowStart + new Vector2(0, 0));
-                ImGui.ColorEdit4("##" + label + "_col1", ref tmpColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoTooltip | ImGuiColorEditFlags.NoLabel);
+                ColorEdit("##" + label + "_col1", ref tmpColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoTooltip | ImGuiColorEditFlags.NoLabel);
 
                 float height = ImGui.GetFrameHeight();
                 float width = height * 1.7f;
@@ -1227,7 +1242,7 @@ namespace Titled_Gui
             Vector4 temp = color;
             RenderRowRightAligned(label, () =>
             {
-                ImGui.ColorEdit4("##" + label, ref temp);
+                ColorEdit("##" + label, ref temp, ImGuiColorEditFlags.None);
             }, widgetWidth);
 
             if (!temp.Equals(color))

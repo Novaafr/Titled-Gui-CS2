@@ -6,16 +6,17 @@ using System.Numerics;
 using System.Text;
 using System.Windows.Forms;
 using Titled_Gui.Classes;
+using Titled_Gui.Data.Entity;
 using Titled_Gui.Data.Game;
 
 namespace Titled_Gui.Modules.Visual
 {
     internal class WorldESP // pasted asf
     {
-        public static bool ChickenESP = false;
-        public static bool DroppedWeaponESP = false;
-        public static bool ProjectileESP = false;
-        public static bool HostageESP = false;
+        public static bool chickenESP = false;
+        public static bool droppedWeaponESP = false;
+        public static bool projectileESP = false;
+        public static bool hostageESP = false;
         public static Vector4 WeaponTextColor = new(1, 1, 1, 1);
         public static Vector4 ProjectileTextColor = new(1, 1, 1, 1);
         public static Vector4 ChickenTextColor = new(1, 1, 1, 1);
@@ -101,77 +102,64 @@ namespace Titled_Gui.Modules.Visual
 
         public static void EntityESP()
         {
-            float[] ViewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
-            for (int i = 64; i < 1024; i++)
+            if (!chickenESP && !droppedWeaponESP && !projectileESP && !hostageESP) return;
+
+            foreach (WorldEntity worldEntity in GameState.worldEntities)
             {
-                ulong ItemyListEntry = GameState.swed.ReadULong((nint)((ulong)GameState.EntityList + 8UL * ((ulong)(i & 0x7FFF) >> 9) + 16));
-                if (ItemyListEntry == 0) continue;
+                if (chickenESP && worldEntity.type == WorldEntityManager.EntityKind.Chicken)
+                    DrawChickenESP(worldEntity);
 
-                ulong Item = GameState.swed.ReadULong((nint)((ulong)ItemyListEntry + 112UL * (ulong)(i & 0x1FF)));
-                if (Item == 0) continue;
+                if (droppedWeaponESP && worldEntity.type == WorldEntityManager.EntityKind.Weapon)
+                    DrawWeaponESP(worldEntity);
 
-                ulong ItemNode = GameState.swed.ReadULong((nint)Item + Offsets.m_pGameSceneNode);
-                Vector3 ItemOrigin = GameState.swed.ReadVec((nint)ItemNode + Offsets.m_vecAbsOrigin);
-                Vector2 ItemPosition2D = Calculate.WorldToScreen(ViewMatrix, ItemOrigin, GameState.renderer.screenSize);
+                if (projectileESP && worldEntity.type == WorldEntityManager.EntityKind.Projectile)
+                    DrawProjectileESP(worldEntity);
 
-
-                ulong ItemInfo = GameState.swed.ReadULong((nint)(Item + 0x10));
-                ulong ItemTypePtr = GameState.swed.ReadULong((nint)(ItemInfo + 0x20));
-
-                if (ItemOrigin.X != 0f)
-                {
-                    byte[] Buffer = GameState.swed.ReadBytes((nint)ItemTypePtr, 128);
-                    int len = Array.IndexOf<byte>(Buffer, 0);
-                    if (len < 0) len = Buffer.Length;
-                    string type = System.Text.Encoding.UTF8.GetString(Buffer, 0, len);
-
-                    string Weapons = GetWeaponType(type);
-                    string Projectiles = GetProjectileType(type);
-                    string Entity = GetEntityType(type);
-
-                    if (Weapons != "Unknown Weapon Type")
-                    {
-                        if (DroppedWeaponESP)
-                            GameState.renderer.drawList.AddText(ItemPosition2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), Weapons);
-                    }
-
-                    if (Projectiles != "Unknown Projectile Type")
-                    {
-                        if (ProjectileESP)
-                            GameState.renderer.drawList.AddText(ItemPosition2D, ImGui.ColorConvertFloat4ToU32(ProjectileTextColor), Projectiles);
-                    }
-
-                    if (Entity != "Unknown Entity Type")
-                    {
-                        if (ChickenESP && type.Contains("chicken"))
-                        {
-                            Vector3 chickenHeight = ItemOrigin + new Vector3(0f, 0f, 20f);
-                            Vector2 chickenHeight2D = Calculate.WorldToScreen(ViewMatrix, chickenHeight, GameState.renderer.screenSize);
-
-                            float boxHeight = MathF.Abs(chickenHeight2D.Y - ItemPosition2D.Y);
-                            float boxWidth = boxHeight * 1.6f;
-                            Vector2 topLeft = new(ItemPosition2D.X - boxWidth / 2f, chickenHeight2D.Y);
-                            Vector2 bottomRight = new(ItemPosition2D.X + boxWidth / 2f, ItemPosition2D.Y);
-                            GameState.renderer.drawList.AddRect(topLeft, bottomRight, ImGui.ColorConvertFloat4ToU32(ChickenBoxColor));
-                            GameState.renderer.drawList.AddText(ItemPosition2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), "Chicken");
-                        }
-
-                        if (HostageESP && type.Contains("hostage_entity"))
-                        {
-                            Vector3 hostagesHeight = ItemOrigin + new Vector3(0f, 0f, 72f);
-                            Vector2 HostagesHeight2D = Calculate.WorldToScreen(ViewMatrix, hostagesHeight, GameState.renderer.screenSize);
-
-                            float boxHeight = MathF.Abs(HostagesHeight2D.Y - ItemPosition2D.Y);
-                            float boxWidth = boxHeight * 0.6f;
-                            Vector2 topLeft = new(ItemPosition2D.X - boxWidth / 2f, HostagesHeight2D.Y);
-                            Vector2 bottomRight = new(ItemPosition2D.X + boxWidth / 2f, ItemPosition2D.Y);
-
-                            GameState.renderer.drawList.AddRect(topLeft, bottomRight, ImGui.ColorConvertFloat4ToU32(HostageBoxColor));
-                            GameState.renderer.drawList.AddText(ItemPosition2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), "Hostage");
-                        }
-                    }
-                }
+                if (hostageESP && worldEntity.type == WorldEntityManager.EntityKind.Hostage)
+                    DrawHostageESP(worldEntity);
             }
+        }
+
+        private static void DrawHostageESP(WorldEntity worldEntity)
+        {
+            float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
+
+            Vector3 hostagesHeight = worldEntity.position + new Vector3(0f, 0f, 72f);
+            Vector2 HostagesHeight2D = Calculate.WorldToScreen(viewMatrix, hostagesHeight);
+
+            float boxHeight = MathF.Abs(HostagesHeight2D.Y - worldEntity.position2D.Y);
+            float boxWidth = boxHeight * 0.6f;
+            Vector2 topLeft = new(worldEntity.position2D.X - boxWidth / 2f, HostagesHeight2D.Y);
+            Vector2 bottomRight = new(worldEntity.position2D.X + boxWidth / 2f, worldEntity.position2D.Y);
+
+            GameState.renderer.drawList.AddRect(topLeft, bottomRight, ImGui.ColorConvertFloat4ToU32(HostageBoxColor));
+            GameState.renderer.drawList.AddText(worldEntity.position2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), "Hostage");
+        }
+
+        private static void DrawProjectileESP(WorldEntity worldEntity)
+        {
+            GameState.renderer.drawList.AddText(worldEntity.position2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), worldEntity.displayName);
+        }
+
+        private static void DrawWeaponESP(WorldEntity worldEntity)
+        {
+            if (worldEntity == null || worldEntity.position2D == new Vector2(-99, -99))
+                return;
+            GameState.renderer.drawList.AddText(worldEntity.position2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), worldEntity.displayName);
+        }
+
+        private static void DrawChickenESP(WorldEntity worldEntity)
+        {
+            float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
+            Vector3 chickenHeight = worldEntity.position + new Vector3(0f, 0f, 20f);
+            Vector2 chickenHeight2D = Calculate.WorldToScreen(viewMatrix, chickenHeight);
+
+            float boxHeight = MathF.Abs(chickenHeight2D.Y - worldEntity.position2D.Y);
+            float boxWidth = boxHeight * 1.6f;
+            Vector2 topLeft = new(worldEntity.position2D.X - boxWidth / 2f, chickenHeight2D.Y);
+            Vector2 bottomRight = new(worldEntity.position2D.X + boxWidth / 2f, worldEntity.position2D.Y);
+            GameState.renderer.drawList.AddRect(topLeft, bottomRight, ImGui.ColorConvertFloat4ToU32(ChickenBoxColor));
+            GameState.renderer.drawList.AddText(worldEntity.position2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), "Chicken");
         }
     }
 }

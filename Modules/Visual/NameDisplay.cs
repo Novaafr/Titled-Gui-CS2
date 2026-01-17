@@ -12,8 +12,11 @@ namespace Titled_Gui.Modules.Visual
         public static Vector4 NameTextColor = new(1, 1, 1, 1);
         public static void DrawName(Entity e, Renderer renderer)
         {
-            if (e == null || e.Position2D == new Vector2(-99, -99) || e.PawnAddress == GameState.LocalPlayer.PawnAddress || e.Health <= 0 || BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed || e?.Bones2D == null || e?.Bones2D?.Count < 2 || e?.Bones2D?[2] == new Vector2(-99, -99)) return;
+            if (e == null || e.Position2D == new Vector2(-99, -99) || e.PawnAddress == GameState.LocalPlayer.PawnAddress || e.Health <= 0 || BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed || e?.Bones2D == null || e?.Bones2D?.Count < 2 || e?.Bones2D?[2] == new Vector2(-99, -99)) 
+                return;
+
             var rect = BoxESP.GetBoxRect(e);
+
             if (rect != null)
             {
                 var (topLeft, bottomRight, topRight, bottomLeft, bottomMiddle) = rect.Value;

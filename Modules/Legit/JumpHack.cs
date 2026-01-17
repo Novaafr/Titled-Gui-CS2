@@ -3,7 +3,7 @@ using Titled_Gui.Data.Game;
 
 namespace Titled_Gui.Modules.Legit
 {
-    internal class JumpHack : Classes.ThreadService 
+    internal class JumpHack
     {
         public static bool JumpHackEnabled = false;
         public static int JumpHotkey = 0x20;
@@ -16,9 +16,9 @@ namespace Titled_Gui.Modules.Legit
                 User32.Click();
             }
         }
-        protected override void FrameAction()
-        {
-            JumpShot();
-        }
+        //protected override void FrameAction()
+        //{
+        //    JumpShot();
+        //}
     }
 }

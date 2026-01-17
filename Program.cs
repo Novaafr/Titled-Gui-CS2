@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Datamodel;
+using ImGuiNET;
 using Swed64;
 using System.Numerics;
 using Titled_Gui;
@@ -18,7 +19,8 @@ try
     Renderer.LoadFonts();
     Thread renderThread = new(() => GameState.renderer.Start().Wait())
     {
-        IsBackground = true
+        IsBackground = true,
+        
     };
     renderThread.Start();
     // entities
@@ -56,6 +58,7 @@ try
         Priority = ThreadPriority.Highest
     };
     entityUpdateThread.Start();
+
     ThreadService.StartAllThreadServices();
     while (true)
     {

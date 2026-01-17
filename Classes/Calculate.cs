@@ -7,7 +7,7 @@ namespace Titled_Gui.Classes
 {
     public static class Calculate
     {
-        public static Vector2 WorldToScreen(float[] matrix, Vector3 pos, Vector2 windowSize)// this seemed slightly better or same idk
+        public static Vector2 WorldToScreen(float[] matrix, Vector3 pos)// this seemed slightly better or same idk
         {
             // calculate depth
             float view = matrix[3 * 4 + 0] * pos.X + matrix[3 * 4 + 1] * pos.Y + matrix[3 * 4 + 2] * pos.Z + matrix[3 * 4 + 3];
@@ -24,8 +24,8 @@ namespace Titled_Gui.Classes
             float screenY = matrix[1 * 4 + 0] * pos.X + matrix[1 * 4 + 1] * pos.Y + matrix[1 * 4 + 2] * pos.Z + matrix[1 * 4 + 3];
 
             // perspective division 
-            float halfW = windowSize.X * 0.5f;
-            float halfH = windowSize.Y * 0.5f;
+            float halfW = GameState.renderer.screenSize.X * 0.5f;
+            float halfH = GameState.renderer.screenSize.Y * 0.5f;
 
             float X = halfW + (screenX / view) * halfW;
             float Y = halfH - (screenY / view) * halfH;
@@ -74,7 +74,7 @@ namespace Titled_Gui.Classes
             List<Vector2> Bones2d = [];
             foreach (Vector3 bone in Bones)
             {
-                Vector2 bone2d = WorldToScreen(ViewMatrix, bone, screenSize);
+                Vector2 bone2d = WorldToScreen(ViewMatrix, bone);
                 Bones2d.Add(bone2d);
             }
             return Bones2d;

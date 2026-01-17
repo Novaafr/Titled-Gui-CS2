@@ -18,10 +18,10 @@ namespace Titled_Gui.Modules.Visual
 
         public static IntPtr GetPlanted()
         {
-            IntPtr ptrToPlanted = GameState.swed.ReadPointer(GameState.client + Offsets.dwPlantedC4);
-            if (ptrToPlanted == IntPtr.Zero) return IntPtr.Zero;
+            IntPtr plantedPointer = GameState.swed.ReadPointer(GameState.client + Offsets.dwPlantedC4);
+            if (plantedPointer == IntPtr.Zero) return IntPtr.Zero;
 
-            return GameState.swed.ReadPointer(ptrToPlanted);
+            return GameState.swed.ReadPointer(plantedPointer);
         }
 
         public static IntPtr GetNode()
@@ -43,17 +43,17 @@ namespace Titled_Gui.Modules.Visual
         {
             if (!BoxEnabled && !TextEnabled) return;
 
-            Vector3 Position = GetPos();
-            float[] ViewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
-            Vector2 Position2D = Calculate.WorldToScreen(ViewMatrix, Position, GameState.renderer.screenSize);
+            Vector3 position = GetPos();
+            float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
+            Vector2 position2D = Calculate.WorldToScreen(viewMatrix, position);
 
-            if (Position == new Vector3(0f, 0f, 0f) || GetNode() == IntPtr.Zero || GetPlanted() == IntPtr.Zero) return;
+            if (position == new Vector3(0f, 0f, 0f) || GetNode() == IntPtr.Zero || GetPlanted() == IntPtr.Zero) return;
 
             if (TextEnabled)
-                GameState.renderer.drawList.AddText(Position2D, ImGui.ColorConvertFloat4ToU32(TextColor), "C4");
+                GameState.renderer.drawList.AddText(position2D, ImGui.ColorConvertFloat4ToU32(TextColor), "C4");
 
             if (BoxEnabled)
-                GameState.renderer.drawList.AddRect(Position2D, new(Position2D.X + 10, Position2D.Y + 10), ImGui.ColorConvertFloat4ToU32(BoxColor));
+                GameState.renderer.drawList.AddRect(position2D, new(position2D.X + 10 * (float)Math.Clamp(Vector2.Distance(position2D, GameState.LocalPlayer.Position2D), 1.5, 10), position2D.Y + 10), ImGui.ColorConvertFloat4ToU32(BoxColor));
         }
     }
 }

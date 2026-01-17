@@ -1,6 +1,10 @@
-﻿using ImGuiNET;
+﻿using Datamodel;
+using ImGuiNET;
+using Microsoft.Win32;
 using SharpGen.Runtime.Win32;
+using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Titled_Gui.Classes;
 using Titled_Gui.Data.Entity;
 using Titled_Gui.Data.Game;
@@ -21,10 +25,10 @@ namespace Titled_Gui.Modules.Visual
         public static bool OuterOutline = true;
         public static Vector2 InnerOutlineThickness = new(1f, 1f);
         public static Vector4 InnerOutlineColor = new(0, 0, 0, 1f);
-        public static Vector2 OuterOutlineThickness = new(2f, 2f);
+        public static Vector2 OuterOutlineThickness = new(1.4f, 1.4f);
         public static Vector4 OutlineEnemyColor = new(1, 0, 0, 1);
         public static Vector4 OutlineTeamColor = new(0, 1, 0, 1);
-        public static float Rounding = 3f;
+        public static float Rounding = 0f;
         public static bool FlashCheck = true; // THIS APPLIES TO ALL VISUALS BESIDES LIKE ONES THAT DONT HAVE ANYTHING TO DO WITH THE ENTITIES
         public static float GlowAmount = 0f;
         public static bool BoxFillGradient = false;
@@ -32,30 +36,36 @@ namespace Titled_Gui.Modules.Visual
         public static Vector4 BoxFillGradientBottom = new(0f,0f,0f, BoxFillOpacity);
         public static float EdgeMultiplier = 0.25f; 
         public static bool EnableESPPreview = true;
-
+        public static Vector4 occludedEnemy = new(1, 1, 0, 1);
+        public static Vector4 occludedTeam = new(0, 0, 1, 1);
         public static void DrawBoxESP(Entity entity, Entity localPlayer, Renderer renderer)
         {
-            if (!EnableESP ||entity == null || (TeamCheck && entity.Team == localPlayer.Team) || entity.PawnAddress == GameState.LocalPlayer.PawnAddress || FlashCheck && GameState.LocalPlayer.IsFlashed || entity?.Bones2D?.Count < 0  || entity?.Bones2D == null) return;
+            if (!EnableESP || entity == null || (TeamCheck && entity.Team == localPlayer.Team) || entity.PawnAddress == GameState.LocalPlayer.PawnAddress || FlashCheck && GameState.LocalPlayer.IsFlashed || entity?.Bones2D?.Count < 0 || entity?.Bones2D == null || entity.Position2D == new Vector2(-99, -99)) return;
 
             try
             {
-                Vector4 boxColor = Colors.RGB ? Colors.Rgb(0.5f) : (GameState.LocalPlayer.Team == entity?.Team ? Colors.TeamColor : Colors.EnemyColor);
+                Vector4 boxColor = GetBoxColor(entity);
+                float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
 
                 Vector4 fillColor = boxColor;
                 fillColor.W = BoxFillOpacity;
-                // get dimensions
+                var preConvertedColor = ImGui.ColorConvertFloat4ToU32(boxColor);
+                var preConvertedFillColor = ImGui.ColorConvertFloat4ToU32(fillColor);
+
+                //var min2D = Calculate.WorldToScreen(viewMatrix, entity.vecMin);
+                //var max2D = Calculate.WorldToScreen(viewMatrix, entity.vecMax);
 
                 float entityHeight = entity.Position2D.Y - entity.ViewPosition2D.Y;
                 float halfWidth = entityHeight / 3f;
                 float centerX = (entity.ViewPosition2D.X + entity.Position2D.X) / 2f;
-                float topY = entity.Bones2D[2].Y;
+                float topY = entity.ViewPosition2D.Y;
                 float bottomY = entity.Position2D.Y;
+                Vector2 rectTop = new(centerX - halfWidth, topY);
+                Vector2 rectBottom = new(centerX + halfWidth, bottomY);
 
                 switch (CurrentShape)
                 {
                     case 0: // 2D box
-                        Vector2 rectTop = new(centerX - halfWidth, topY);
-                        Vector2 rectBottom = new(centerX + halfWidth, bottomY);
 
                         if (GlowAmount > 0f)
                         {
@@ -73,7 +83,7 @@ namespace Titled_Gui.Modules.Visual
                             DrawHelpers.DrawGradientRect(renderer.drawList, rectTop, rectBottom, new(BoxFillGradientColorTop.X, BoxFillGradientColorTop.Y, BoxFillGradientColorTop.Z, BoxFillOpacity), new Vector4(BoxFillGradientBottom.X, BoxFillGradientBottom.Y, BoxFillGradientBottom.Z, BoxFillOpacity), Rounding);
 
                         else
-                            renderer.drawList.AddRectFilled(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(fillColor), Rounding);
+                            renderer.drawList.AddRectFilled(rectTop, rectBottom, preConvertedFillColor, Rounding);
 
                         if (OuterOutline)
                         {
@@ -86,46 +96,44 @@ namespace Titled_Gui.Modules.Visual
 
                         break;
 
-                    case 1:// 3D box, kinda weird looking kinda nice idk
+                    case 1: // 3D box
+                        Vector3[] corners3D =
+                        [
+                            entity.Position + new Vector3(entity.vecMin.X, entity.vecMin.Y, entity.vecMin.Z),
+                            entity.Position + new Vector3(entity.vecMax.X, entity.vecMin.Y, entity.vecMin.Z),
+                            entity.Position + new Vector3(entity.vecMin.X, entity.vecMax.Y, entity.vecMin.Z),
+                            entity.Position + new Vector3(entity.vecMax.X, entity.vecMax.Y, entity.vecMin.Z),
+                            
+                            entity.Position + new Vector3(entity.vecMin.X, entity.vecMin.Y, entity.vecMax.Z),
+                            entity.Position + new Vector3(entity.vecMax.X, entity.vecMin.Y, entity.vecMax.Z),
+                            entity.Position + new Vector3(entity.vecMin.X, entity.vecMax.Y, entity.vecMax.Z),
+                            entity.Position + new Vector3(entity.vecMax.X, entity.vecMax.Y, entity.vecMax.Z)
+                        ];
+
+                        var corners2D = new Vector2[8];
+                        for (int i = 0; i < corners2D.Length; i++)
                         {
-                            float depth = halfWidth;
-
-                            Vector3[] Corners =
-                            [
-                                new(entity.Position.X - halfWidth, entity.Position.Y + entityHeight, entity.Position.Z - depth),
-                                new(entity.Position.X + halfWidth, entity.Position.Y + entityHeight, entity.Position.Z - depth),
-                                new(entity.Position.X + halfWidth, entity.Position.Y + entityHeight, entity.Position.Z + depth),
-                                new(entity.Position.X - halfWidth, entity.Position.Y + entityHeight, entity.Position.Z + depth),
-
-                                new(entity.Position.X - halfWidth, entity.Position.Y, entity.Position.Z - depth),
-                                new(entity.Position.X + halfWidth, entity.Position.Y, entity.Position.Z - depth),
-                                new(entity.Position.X + halfWidth, entity.Position.Y, entity.Position.Z + depth),
-                                new(entity.Position.X - halfWidth, entity.Position.Y, entity.Position.Z + depth),
-                            ];
-                            float[] ViewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
-
-                            Vector2[] Corners2D = new Vector2[Corners.Length];
-                            for (int i = 0; i < Corners.Length; i++)
-                            {
-                                Corners2D[i] = Calculate.WorldToScreen(ViewMatrix, Corners[i], GameState.renderer.screenSize);
-
-                                if (Corners2D[i].X < 0 || Corners2D[i].Y < 0) return;
-                            }
-
-                            renderer.drawList.AddLine(Corners2D[0], Corners2D[1], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[1], Corners2D[2], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[2], Corners2D[3], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[3], Corners2D[0], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[4], Corners2D[5], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[5], Corners2D[6], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[6], Corners2D[7], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[7], Corners2D[4], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[0], Corners2D[4], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[1], Corners2D[5], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[2], Corners2D[6], ImGui.ColorConvertFloat4ToU32(boxColor));
-                            renderer.drawList.AddLine(Corners2D[3], Corners2D[7], ImGui.ColorConvertFloat4ToU32(boxColor));
+                            corners2D[i] = Calculate.WorldToScreen(viewMatrix, corners3D[i]);
+                            if (corners2D[i] == new Vector2(-99, -99)) return;
                         }
+
+                        float thickness = 1.6f;
+                        GameState.renderer.drawList.AddLine(corners2D[0], corners2D[1], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[1], corners2D[3], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[3], corners2D[2], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[2], corners2D[0], preConvertedColor, thickness);
+
+                        GameState.renderer.drawList.AddLine(corners2D[4], corners2D[5], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[5], corners2D[7], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[7], corners2D[6], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[6], corners2D[4], preConvertedColor, thickness);
+
+                        GameState.renderer.drawList.AddLine(corners2D[0], corners2D[4], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[1], corners2D[5], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[2], corners2D[6], preConvertedColor, thickness);
+                        GameState.renderer.drawList.AddLine(corners2D[3], corners2D[7], preConvertedColor, thickness);
                         break;
+
 
                     case 2: //  edges
                         Vector2 rectTopLeft = new(centerX - halfWidth, topY);
@@ -180,13 +188,11 @@ namespace Titled_Gui.Modules.Visual
                             Vector3 left = new(pos.X - size / 2f, pos.Y - size / 2f, pos.Z + size / 2f);
                             Vector3 right = new(pos.X + size / 2f, pos.Y - size / 2f, pos.Z + size / 2f);
 
-                            float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
-
-                            Vector2 s_up = Calculate.WorldToScreen(viewMatrix, up, GameState.renderer.screenSize);
-                            Vector2 s_upLeft = Calculate.WorldToScreen(viewMatrix, upLeft, GameState.renderer.screenSize);
-                            Vector2 s_upRight = Calculate.WorldToScreen(viewMatrix, upRight, GameState.renderer.screenSize);
-                            Vector2 s_left = Calculate.WorldToScreen(viewMatrix, left, GameState.renderer.screenSize);
-                            Vector2 s_right = Calculate.WorldToScreen(viewMatrix, right, GameState.renderer.screenSize);
+                            Vector2 s_up = Calculate.WorldToScreen(viewMatrix, up);
+                            Vector2 s_upLeft = Calculate.WorldToScreen(viewMatrix, upLeft);
+                            Vector2 s_upRight = Calculate.WorldToScreen(viewMatrix, upRight);
+                            Vector2 s_left = Calculate.WorldToScreen(viewMatrix, left);
+                            Vector2 s_right = Calculate.WorldToScreen(viewMatrix, right);
 
                             uint col = ImGui.ColorConvertFloat4ToU32(boxColor);
 
@@ -205,8 +211,33 @@ namespace Titled_Gui.Modules.Visual
             }
             catch (Exception e)
             {
-                SendNotification("ERROR", $"A Exception Was Thrown: {e}");
+                Console.WriteLine($"An exception was thrown: {e}");
             }
+        }
+        private static Vector4 GetBoxColor(Entity entity)
+        {
+            Vector4 boxColor = new(1, 1, 1, 1);
+
+            if (BoneESP.visibilityCheck && !entity.Visible)
+            {
+                boxColor = entity.Team == GameState.LocalPlayer.Team ? occludedTeam : occludedEnemy;
+            }
+            else
+            {
+                boxColor = entity.Team == GameState.LocalPlayer.Team ? OutlineTeamColor : OutlineEnemyColor;
+            }
+
+            if (Colors.RGB)
+            {
+                boxColor = Colors.Rgb(0.5f);
+            }
+
+            boxColor.W = BoxFillOpacity;
+            if (BoxFillGradient)
+            {
+                boxColor = new(BoxFillGradientColorTop.X, BoxFillGradientColorTop.Y, BoxFillGradientColorTop.Z, BoxFillOpacity);
+            }
+            return boxColor;
         }
 
         public static void RenderESPPreview(Vector2 center)
@@ -296,7 +327,7 @@ namespace Titled_Gui.Modules.Visual
 
                     for (int i = 0; i < corners.Length; i++)
                     {
-                        corners2D[i] = Calculate.WorldToScreen(viewMatrix, corners[i], GameState.renderer.screenSize);
+                        corners2D[i] = Calculate.WorldToScreen(viewMatrix, corners[i]);
                     }
 
                     for (int i = 0; i < 4; i++)

@@ -54,7 +54,6 @@ namespace Titled_Gui.Classes
         public const uint KEYEVENTF_KEYUP = 0x0002;
         public const byte VK_SPACE = 0x20;
         private const int WH_KEYBOARD_LL = 13;
-        private static LowLevelKeyboardProc _proc;
         private const int WM_KEYDOWN = 0x0100;
         private static IntPtr _hookID = IntPtr.Zero;
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);

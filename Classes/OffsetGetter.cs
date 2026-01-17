@@ -106,6 +106,15 @@ namespace Titled_Gui.Classes
             { "m_vecAbsOrigin", new() { new Offset("m_vecAbsOrigin") } },
             { "m_GunGameImmunityColor", new() { new Offset("m_GunGameImmunityColor") } },
             { "m_flEmitSoundTime", new() { new Offset("m_flEmitSoundTime") } },
+            { "m_vecMins", new() { new Offset("m_vecMins") } },
+            { "m_vecMaxs", new() { new Offset("m_vecMaxs") } },
+            { "v_angle", new() { new Offset("v_angle") } },
+            { "m_Collision", new() { new Offset("m_Collision") } },
+            { "m_CHitboxComponent", new() { new Offset("m_CHitboxComponent") } },
+            { "m_bDormant", new() { new Offset("m_bDormant") } },
+            { "m_nSmokeEffectTickBegin", new() { new Offset("m_nSmokeEffectTickBegin") } },
+            { "m_pEntity", new() { new Offset("m_pEntity") } },
+            { "m_designerName", new() { new Offset("m_designerName") } },
 
             // EXPLICIT CLASS THING
             { "m_pActionTrackingServices", new() { new Offset("m_pActionTrackingServices", "CCSPlayerController") } },
@@ -114,6 +123,9 @@ namespace Titled_Gui.Classes
             { "m_iNumRoundKills", new() { new Offset("m_iNumRoundKills", "CCSPlayerController_ActionTrackingServices") } },
             { "m_iNumRoundKillsHeadshots", new() { new Offset("m_iNumRoundKillsHeadshots", "CCSPlayerController_ActionTrackingServices") } },
             { "m_entitySpottedState", new() { new Offset("m_entitySpottedState", "C_CSPlayerPawn") } },
+            { "m_vecOrigin", new() { new Offset("m_vecOrigin", "CGameSceneNode") } },
+            { "m_angRotation", new() { new Offset("m_angRotation", "CGameSceneNode") } },
+            { "m_vSmokeColor", new() { new Offset("m_vSmokeColor", "C_SmokeGrenadeProjectile ") } },
             //{ "m_bBombPlanted", new() { new Offset("m_bBombPlanted", "C_CSGameRules") } },
 
         };
