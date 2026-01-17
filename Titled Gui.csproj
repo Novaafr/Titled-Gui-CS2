@@ -129,9 +129,6 @@
 	  <None Update="Data\Game\MapParser\PreExtractedMapData\tri\de_vertigo.tri">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Data\Game\MapParser\PreExtractedMapData\vphys\de_dust2.vphys">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 
 </Project>
