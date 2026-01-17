@@ -145,6 +145,7 @@ namespace Titled_Gui.Modules.Visual
         {
             if (worldEntity == null || worldEntity.position2D == new Vector2(-99, -99))
                 return;
+
             GameState.renderer.drawList.AddText(worldEntity.position2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), worldEntity.displayName);
         }
 

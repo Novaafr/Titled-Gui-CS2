@@ -499,6 +499,7 @@ namespace Titled_Gui
                             RenderBoolSetting("Eye Ray", ref EyeRay.Enabled);
                             RenderBoolSettingWith1ColorPicker("Gun Icon", ref GunDisplay.Enabled, ref GunDisplay.TextColor);
                             RenderBoolSettingWith2ColorPickers("Sound ESP", ref SoundESP.enabled, ref SoundESP.teamColor, ref SoundESP.enemyColor);
+                            RenderBoolSettingWith1ColorPicker("Ping Display", ref PingDisplay.enabled, ref PingDisplay.pingTextColor);
                             ImGui.EndChild();
 
                             ImGui.NextColumn();

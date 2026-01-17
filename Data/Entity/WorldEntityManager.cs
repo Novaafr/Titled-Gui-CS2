@@ -116,6 +116,7 @@ namespace Titled_Gui.Data.Entity
                 byte[] buffer = GameState.swed.ReadBytes(itemTypePtr, 128);
                 int len = Array.IndexOf<byte>(buffer, 0);
                 if (len < 0) len = buffer.Length;
+
                 string type = Encoding.UTF8.GetString(buffer, 0, len >= 0 ? len : buffer.Length).Trim().Split('\0')[0].Replace("?", "").Replace("\0", "");
                 if (string.IsNullOrWhiteSpace(type))
                     continue;
