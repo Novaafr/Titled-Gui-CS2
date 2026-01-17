@@ -673,10 +673,6 @@ namespace Titled_Gui
         {
             try
             {
-                WorldESP.EntityESP();
-
-                if (Aimbot.targetLine)
-                    Aimbot.RenderTargetLine();
                 HitStuff.CreateHitText();
 
                 if (EyeRay.Enabled)
@@ -740,6 +736,10 @@ namespace Titled_Gui
                             Tracers.DrawTracers(entity, this);
                         }
                     }
+                }
+                foreach (var entity in GameState.Entities)
+                {
+                    SoundESP.DrawSoundESP(entity);
                 }
                 foreach (var entity in GameState.Entities)
                 {
@@ -1136,8 +1136,23 @@ namespace Titled_Gui
                 onChanged?.Invoke();
             }
         }
+         private static Dictionary<string, bool> openPopups = new Dictionary<string, bool>();
+  private static Dictionary<string, bool> previousValues = new Dictionary<string, bool>();
 
+  private static void RenderBoolSettingWithWarning(string label, ref bool value, Action? onChanged = null, float widgetWidth = 0f)
+  {
+      if (!openPopups.ContainsKey(label))
+          openPopups[label] = false;
 
+      if (!previousValues.ContainsKey(label))
+          previousValues[label] = value;
+
+      bool temp = value;
+      RenderRowRightAligned(label, () =>
+      {
+          float height = ImGui.GetFrameHeight();
+          float width = height * 1.7f;
+          float radius = height / 2f - 2f;
 
         private void RenderBoolSettingWith2ColorPickers(string label, ref bool value, ref Vector4 color1, ref Vector4 color2)
         {

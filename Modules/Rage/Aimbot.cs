@@ -1,6 +1,4 @@
 ﻿using ImGuiNET;
-using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Numerics;
 using Titled_Gui.Classes;
 using Titled_Gui.Data.Entity;
@@ -105,24 +103,16 @@ namespace Titled_Gui.Modules.Rage
                     if (float.IsNaN(newAngles.X) || float.IsNaN(newAngles.Y))
                         return;
 
-                    Vector2 newAngles2D =
-                        (target != null && target.Bones2D != null
-                        && CurrentBoneIndex < target.Bones2D.Count && target.Bones2D[CurrentBoneIndex] != Vector2.Zero)
-                        ? target.Bones2D[CurrentBoneIndex] : target?.Position2D ?? Vector2.Zero; // holy ts is long
-
-                    int dx = (int)(newAngles2D.X - screenCenter.X);
-                    int dy = (int)(newAngles2D.Y - screenCenter.Y);
-                    MoveMousePos(dx, dy);
-                }
-                else
-                    target = null;
-
-            }
-            catch (DivideByZeroException)
-            {
-            }
-            catch (Exception)
-            {
+                switch (CurrentAimMethod)
+                {
+                    case 0: // mouse
+                        {
+                            Vector2 newAngles2D = (target != null && target.Bones2D != null  &&
+                            CurrentBoneIndex < target.Bones2D.Count && target.Bones2D[CurrentBoneIndex] != Vector2.Zero) 
+                            ? target.Bones2D[CurrentBoneIndex] : target?.Position2D ?? Vector2.Zero; // holy ts is long
+                            
+                            int dx = (int)(newAngles2D.X - screenCenter.X);
+                            int dy = (int)(newAngles2D.Y - screenCenter.Y);
 
             }
         }

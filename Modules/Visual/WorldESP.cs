@@ -112,8 +112,10 @@ namespace Titled_Gui.Modules.Visual
                 if (droppedWeaponESP && worldEntity.type == WorldEntityManager.EntityKind.Weapon)
                     DrawWeaponESP(worldEntity);
 
-                if (projectileESP && worldEntity.type == WorldEntityManager.EntityKind.Projectile)
-                    DrawProjectileESP(worldEntity);
+                ulong ItemNode = GameState.swed.ReadULong((nint)Item + Offsets.m_pGameSceneNode);
+                Vector3 ItemOrigin = GameState.swed.ReadVec((nint)ItemNode + Offsets.m_vecAbsOrigin);
+                Vector2 ItemPosition2D = Calculate.WorldToScreen(ViewMatrix, ItemOrigin, GameState.renderer.screenSize);
+            
 
                 if (hostageESP && worldEntity.type == WorldEntityManager.EntityKind.Hostage)
                     DrawHostageESP(worldEntity);
@@ -149,11 +151,15 @@ namespace Titled_Gui.Modules.Visual
             GameState.renderer.drawList.AddText(worldEntity.position2D, ImGui.ColorConvertFloat4ToU32(WeaponTextColor), worldEntity.displayName);
         }
 
-        private static void DrawChickenESP(WorldEntity worldEntity)
-        {
-            float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
-            Vector3 chickenHeight = worldEntity.position + new Vector3(0f, 0f, 20f);
-            Vector2 chickenHeight2D = Calculate.WorldToScreen(viewMatrix, chickenHeight);
+                        if (HostageESP && type.Contains("hostage_entity"))
+                        {
+                            Vector3 hostagesHeight = ItemOrigin + new Vector3(0f, 0f, 72f);
+                            Vector2 HostagesHeight2D = Calculate.WorldToScreen(ViewMatrix, hostagesHeight, GameState.renderer.screenSize);
+                            
+                            float boxHeight = MathF.Abs(HostagesHeight2D.Y - ItemPosition2D.Y);
+                            float boxWidth = boxHeight * 0.6f;
+                            Vector2 topLeft = new(ItemPosition2D.X - boxWidth / 2f, HostagesHeight2D.Y);
+                            Vector2 bottomRight = new(ItemPosition2D.X + boxWidth / 2f, ItemPosition2D.Y);
 
             float boxHeight = MathF.Abs(chickenHeight2D.Y - worldEntity.position2D.Y);
             float boxWidth = boxHeight * 1.6f;

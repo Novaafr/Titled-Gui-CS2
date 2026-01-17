@@ -65,6 +65,19 @@ namespace Titled_Gui.Modules.Visual
 
                 Vector2 boneA = entity.Bones2D[a];
                 Vector2 boneB = entity.Bones2D[b];
+                if (visibilityCheck)
+                {
+                    //if (Classes.VisibilityCheck.BVH.VisibleBone(entity.Bones[a]) && Classes.VisibilityCheck.BVH.VisibleBone(entity.Bones[b]))
+                    //{
+                        //renderer.drawList.AddLine(boneA, boneB, ImGui.ColorConvertFloat4ToU32(visibleBoneColor), thickness);
+                        //Console.WriteLine("thing a");
+                    //}
+                    //else
+                    //{
+                        //renderer.drawList.AddLine(boneA, boneB, ImGui.ColorConvertFloat4ToU32(occludedBoneColor), thickness);
+                        //Console.WriteLine("thing b");
+                    //}
+                }
                 if (IsValidScreenPoint(boneA) && IsValidScreenPoint(boneB))
                 {
                     float boneLength = Vector2.Distance(boneA, boneB);
@@ -103,8 +116,10 @@ namespace Titled_Gui.Modules.Visual
 
                 if (GlowAmount > 0)
                     DrawHelpers.DrawGlowCircle(renderer.drawList, HeadPos, radius, BoneColor, GlowAmount);
-
-                renderer.drawList.AddCircleFilled(HeadPos, radius, boneColor); // draw a circle at the Head bone extra big
+                if (entity.Visible)
+                    renderer.drawList.AddCircleFilled(HeadPos, radius, boneColor); // draw a circle at the Head bone extra big
+                else
+                    renderer.drawList.AddCircleFilled(HeadPos, radius, ImGui.ColorConvertFloat4ToU32(new(1, 0, 0, 1)));
             }
         }
 

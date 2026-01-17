@@ -2,7 +2,8 @@
 Fix trigger bot
 
 # Middle Ground
-Gernade Helper
+Trigger bot not use crosshair index bs instead use a raycast or sum
+Menu useable in game
 
 # Least Important
 Bhop Using Keyboard Input,

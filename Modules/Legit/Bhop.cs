@@ -1,7 +1,4 @@
-﻿using SharpGen.Runtime.Win32;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using Titled_Gui.Classes;
+﻿using Titled_Gui.Classes;
 using Titled_Gui.Data.Game;
 using static Titled_Gui.Data.Game.GameState;
 
@@ -19,31 +16,26 @@ namespace Titled_Gui.Modules.Legit
 
         public static void AutoBhop()
         {
-            //int now = GlobalVar.GetTickCount();
-
-            if ((User32.GetAsyncKeyState(HopKey) & 0x8000) == 0)
-                return;
-
-            //if (now - lastJumped < random.Next(minDelay, maxDelay))
-            //    return;
-
-            //if (((int)Fflag & (int)FFlag.FFlagStates.OnGround) == 0)
-            //{
-            //    return;
-            //}
-
-            if (Fflag == 65665 || Fflag == 65667)
+            if (User32.GetAsyncKeyState(HopKey) < 0)
             {
-                //Console.WriteLine(Fflag);
-                GameState.swed.WriteInt(GameState.client + Offsets.jump, 65537); // write the value to ForceJump to make the player jump
-                Thread.Sleep(2); // sleep 
-            }
-            else
-            { 
-                GameState.swed.WriteInt(GameState.client+Offsets.jump, 256); // unfoprce the jump
-                Thread.Sleep(2); //sleep
-            }
-            //lastJumped = now;
+                for (int i = 0; i < 100; i++) // thanks stack overflow i dontg know how to do this outside unity
+                {
+                    int randomValueBetween0And99 = RandomGen.Next(100);
+                    if (randomValueBetween0And99 < Chance)
+                    {
+                        if (Fflag == 65665 || Fflag == 65667)
+                        {
+                            GameState.swed.WriteInt(GameState.ForceJump, 65537); 
+                            Thread.Sleep(5);
+                        }
+                        else
+                        {
+                            GameState.swed.WriteInt(GameState.ForceJump, 256);
+                            Thread.Sleep(5); 
+                        }
+
+                    }
+                }
 
             //var inputs = new User32.INPUT[2];
             //inputs[0].type = User32.INPUT_KEYBOARD;

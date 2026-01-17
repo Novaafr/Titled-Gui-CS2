@@ -52,22 +52,5 @@ namespace Titled_Gui.Data.Entity
         public IntPtr SpottedByState { get; set; }
         public Vector3 AngEyeAngles { get; set; }
         public Vector3 GunGameImmunityColor { get; set; }
-        public IntPtr gameSceneNode { get; set; }
-        /// <summary>
-        /// may only be for lp
-        /// </summary>
-        public float sensitivity { get; set; }
-        public float emitSoundTime { get; set; }
-        public Vector3 eyePosition { get; set; }
-        public Vector3 vecMin { get; set; }
-        public Vector3 vecMax { get; set; }
-        public IntPtr hitboxComponent { get; set; }
-        public bool dormant { get; set; }
-        public string GetSchemaName()
-        {
-            var identity = GameState.swed.ReadPointer(GameState.currentPawn + Offsets.m_pEntity);
-
-            return GameState.swed.ReadString(identity + Offsets.m_designerName, 32);
-        }
     }
 }
