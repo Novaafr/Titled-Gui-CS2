@@ -32,26 +32,20 @@ namespace Titled_Gui.Data.Entity
                 {
                     currentController = GameState.swed.ReadPointer(listEntry + 0x70 * (i & 0x1FF));
                     if (currentController == IntPtr.Zero) continue;
-                    Console.WriteLine("CC" + currentController);
 
                     int pawnHandle = GameState.swed.ReadInt(currentController, Offsets.m_hPlayerPawn);
                     if (pawnHandle == 0) continue;
-                    Console.WriteLine("ph" + pawnHandle);
 
                     IntPtr listEntry2 = GameState.swed.ReadPointer(GameState.EntityList + (0x8 * ((pawnHandle & 0x7FFF) >> 9)) + 0x10);
                     if (listEntry2 == IntPtr.Zero) continue;
-                    Console.WriteLine("le2" + listEntry2);
 
                     GameState.currentPawn = GameState.swed.ReadPointer(listEntry2 + 0x70 * (pawnHandle & 0x1FF));
                     if (GameState.currentPawn == IntPtr.Zero) continue;
-                    Console.WriteLine("cp" + currentPawn);
 
                     int lifeState = GameState.swed.ReadInt(GameState.currentPawn, Offsets.m_lifeState);
                     if (lifeState != 256) continue;
-                    Console.WriteLine("ls" + lifeState);
 
                     Entity? entity = PopulateEntity(GameState.currentPawn);
-                    Console.WriteLine("e" + entity?.Name);
 
                     if (entity != null)
                         entities?.Add(entity);
