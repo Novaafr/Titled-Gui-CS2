@@ -160,7 +160,7 @@ namespace Titled_Gui.Data.Entity
                 string map = GlobalVar.GetCurrentMapName().Replace("maps/", "").Replace(".vpk", "");
 
                 if (string.IsNullOrEmpty(map) || map == "<empty>") return;
-                Console.WriteLine(map);
+
                 if (mapLoaderInstance == null)
                 {
                     mapLoaderInstance ??= new MapLoader();

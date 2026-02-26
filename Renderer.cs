@@ -323,7 +323,7 @@ namespace Titled_Gui
                     float offset = (ImGui.GetContentRegionAvail().X - LogoWidth) * 0.5f;
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
 
-                    AddOrGetImagePointer("..\\..\\..\\..\\Resources\\MenuLogo.png", true, out _menuLogoTexture, out _width, out _height);
+                    AddOrGetImagePointer(AppContext.BaseDirectory + "Resources\\MenuLogo.png", true, out _menuLogoTexture, out _width, out _height);
                     ImGui.Image(_menuLogoTexture, new(120, 120));
                     ImGui.Spacing();
 
@@ -388,7 +388,7 @@ namespace Titled_Gui
                         case 0: // legit
                             ImGui.Columns(2, "Legit Columns", true);
                             ImGui.BeginChild("LeftLegit");
-                            RenderBoolSettingWithWarning("Auto BHOP", ref Modules.Legit.Bhop.BhopEnable);
+                            RenderBoolSettingWithWarning("Auto BHOP", ref Bhop.BhopEnable);
                             //RenderBoolSetting("Jump Shot", ref Modules.Legit.JumpHack.JumpHackEnabled);
                             RenderBoolSetting("Hit Sound", ref HitStuff.Enabled);
                             RenderFloatSlider("Hit Sound Volume", ref HitStuff.Volume, 0, 1);
@@ -786,7 +786,7 @@ namespace Titled_Gui
                 Console.WriteLine(e);
             }
         }
-        public static void DistanceTextThingy(Entity e)
+        public static void DistanceTextThingy(Entity? e)
         {
             if (e == null || (BoxESP.TeamCheck && e?.Team == GameState.LocalPlayer.Team) || e?.Health <= 0 || e?.PawnAddress == GameState.LocalPlayer.PawnAddress || e?.Distance == null || (BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed)) return;
 
@@ -1064,9 +1064,11 @@ namespace Titled_Gui
                 onChanged?.Invoke();
             }
         }
-        private static readonly Dictionary<string, bool> OpenPopups = [];
-        private static readonly Dictionary<string, bool> PreviousValues = [];
-        private static void RenderBoolSettingWithWarning(string label, ref bool value, Action? onChanged = null, float widgetWidth = 0f)
+        private static Dictionary<string, bool> OpenPopups = [];
+        private static Dictionary<string, bool> PreviousValues = [];
+
+        private static void RenderBoolSettingWithWarning(string label, ref bool value, Action? onChanged = null,
+            float widgetWidth = 0f)
         {
             if (!OpenPopups.ContainsKey(label))
                 OpenPopups[label] = false;
@@ -1075,22 +1077,23 @@ namespace Titled_Gui
                 PreviousValues[label] = value;
 
             bool temp = value;
+
             RenderRowRightAligned(label, () =>
             {
                 float height = ImGui.GetFrameHeight();
                 float width = height * 1.7f;
                 float radius = height / 2f - 2f;
-
                 float colWidth = ImGui.GetColumnWidth();
                 float spacing = ImGui.GetStyle().ItemSpacing.X;
                 float posX = ImGui.GetCursorPosX() + colWidth - width - spacing;
+
                 ImGui.SetCursorPosX(posX);
 
                 Vector2 p = ImGui.GetCursorScreenPos();
                 var drawList = ImGui.GetWindowDrawList();
                 string strId = "##" + label;
-
                 ImGui.InvisibleButton(strId, new Vector2(width, height));
+
                 if (ImGui.IsItemClicked())
                 {
                     temp = !temp;
@@ -1110,28 +1113,34 @@ namespace Titled_Gui
 
                 drawList.AddCircleFilled(new Vector2(knobX, knobY), radius,
                     ImGui.ColorConvertFloat4ToU32(knobColor), 36);
-
                 drawList.AddCircle(new Vector2(knobX, knobY), radius,
                     ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.08f, 0.3f)), 36, 1f);
+
             }, widgetWidth);
+
             string popupId = "warning##" + label;
             if (OpenPopups[label])
                 ImGui.OpenPopup(popupId);
 
             bool tempref = OpenPopups[label];
-
             //ImGui.SetNextWindowSize(new Vector2(200, 200));
+
             if (ImGui.BeginPopupModal(popupId, ref tempref, ImGuiWindowFlags.AlwaysAutoResize))
             {
                 ImGui.Text("WARNING\nThis feature uses WPM and or may be detected.\n Use at your own risk.");
                 ImGui.Separator();
-                if (ImGui.Button("OK", new Vector2(120, 0)))
-                    OpenPopups[label] = false; ImGui.CloseCurrentPopup();
 
+                if (ImGui.Button("OK", new Vector2(120, 0)))
+                {
+                    OpenPopups[label] = false;
+                    ImGui.CloseCurrentPopup();
+                }
 
                 ImGui.EndPopup();
             }
+
             PreviousValues[label] = temp;
+
             if (temp != value)
             {
                 value = temp;
