@@ -262,8 +262,8 @@ namespace PhysExtractor.src
             }
 
             // Workshop maps are typically in the Steam library where CS2 is installed
-            string steamLibraryPath = Path.GetDirectoryName(Path.GetDirectoryName(cs2InstallPath)); // Go up two levels from CS2 install
-            string workshopPath = Path.Combine(steamLibraryPath, @"workshop\content\730");
+            string steamLibraryPath = Path.GetDirectoryName(Path.GetDirectoryName(cs2InstallPath)) ?? ""; // Go up two levels from CS2 install
+            string workshopPath = Path.Combine(steamLibraryPath, @"workshop\content\730") ?? "";
 
             if (!Directory.Exists(workshopPath))
             {

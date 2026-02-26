@@ -6,7 +6,7 @@ namespace Titled_Gui.Classes
     {
         public virtual string name => nameof(ThreadService);
         public virtual ThreadPriority threadPriority => ThreadPriority.Normal;
-        public virtual bool isBackground => false;
+        public virtual bool IsBackground => false;
         public virtual Thread? thread {  get; set; }
         protected ThreadService()
         {
@@ -14,18 +14,17 @@ namespace Titled_Gui.Classes
             {
                 Name = name,
                 Priority = threadPriority,
-                IsBackground = isBackground,
+                IsBackground = IsBackground,
             };
         }
         public void Dispose()
         {
             thread?.Interrupt();
             thread?.Join(5);
+            GC.SuppressFinalize(this);
         }
-        public void Start()
-        {
-            thread?.Start();
-        }
+        public void Start() => thread?.Start();
+        
         public void ThreadStart()
         {
             try
@@ -38,7 +37,7 @@ namespace Titled_Gui.Classes
             }
             catch (NullReferenceException e)
             {
-                Console.WriteLine("Null Refrence Exception: " + e);
+                Console.WriteLine("Null reference exception: " + e);
             }
             catch (Exception e)
             {
@@ -50,27 +49,22 @@ namespace Titled_Gui.Classes
 
         public static void StartAllThreadServices()
         {
-            var types = Assembly.GetExecutingAssembly()?.GetTypes()?.Where(t => t.IsSubclassOf(typeof(ThreadService)) && !t.IsAbstract);
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(ThreadService)) && !t.IsAbstract);
 
-            if (types != null)
+            foreach (Type type in types)
             {
-                foreach (Type type in types)
+                if (Activator.CreateInstance(type) is ThreadService service)
                 {
-                    if (type != null)
+                    Thread serviceThread = new(service.Start)
                     {
-                        if (Activator.CreateInstance(type) is ThreadService service)
-                        {
-                            Thread serviceThread = new(service.Start)
-                            {
-                                IsBackground = true
-                            };
-                            serviceThread.Start();
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException($"Failed To Create Service At {type.FullName}");
-                        }
-                    }
+                        IsBackground = true
+                    };
+                    serviceThread.Start();
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Failed To Create Service At {type.FullName}");
                 }
             }
         }

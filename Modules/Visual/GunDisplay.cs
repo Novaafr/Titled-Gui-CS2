@@ -58,22 +58,22 @@ namespace Titled_Gui.Modules.Visual
         };
         public static bool Enabled = false;
         public static Vector4 TextColor = new(1, 1, 1, 1);
-        public static void Draw(Entity e)
+        public static void Draw(Entity? e)
         {
-            if (!Enabled || e.Health == 0 || e.PawnAddress == GameState.LocalPlayer.PawnAddress || e == null || e.CurrentWeaponName == null) return;
+            if (!Enabled || e == null || e.Health == 0 || e.PawnAddress == GameState.LocalPlayer.PawnAddress || e.CurrentWeaponName == null) return;
 
-            string Icon = GetIcon(e.CurrentWeaponName);
+            string icon = GetIcon(e.CurrentWeaponName);
             var rect = BoxESP.GetBoxRect(e);
 
             if (rect == null) return;
 
-            if (!string.IsNullOrEmpty(Icon))
-                GameState.renderer.drawList.AddText(Renderer.GunIconsFont, 24, new Vector2(rect.Value.TopRight.X, rect.Value.TopRight.Y - 10f), ImGui.ColorConvertFloat4ToU32(TextColor), Icon);
+            if (!string.IsNullOrEmpty(icon))
+                GameState.renderer.drawList.AddText(Renderer.GunIconsFont, 24, new Vector2(rect.Value.TopRight.X, rect.Value.TopRight.Y - 10f), ImGui.ColorConvertFloat4ToU32(TextColor), icon);
             
         }
-        public static string GetIcon(string Weapon)
+        public static string GetIcon(string weapon)
         {
-            return !string.IsNullOrEmpty(Weapon) && Guns.TryGetValue(Weapon, out string? icon) ? icon : string.Empty;
+            return !string.IsNullOrEmpty(weapon) && Guns.TryGetValue(weapon, out string? icon) ? icon : string.Empty;
         }
     }
 }

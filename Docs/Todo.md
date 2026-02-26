@@ -10,4 +10,4 @@ Bhop Using Keyboard Input,
 Fix Color picker GUI Bugs,
 Improve color pickers,
 ping display,
-Change all variables to camel case
+Fix naming scheme

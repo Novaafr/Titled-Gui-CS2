@@ -11,10 +11,10 @@ namespace Titled_Gui.Modules.Visual
         public static bool DrawOnTeam = true;
         public static bool DrawCrossb = false;
         public static Vector4 PointColor = new(1f, 1f, 1f, 1f);
-        private static Vector2 CrossPosition = new(200f, 200f);
+        private static Vector2 _crossPosition = new(200f, 200f);
         public static float RenderRange = 250f;
         public static float Proportion = 2600;
-        private static List<Point> Points = [];
+        private static List<Point> _points = [];
         public static int PointType = 0; // 0 = circle, 1 = arrow, 2 = arc
         public static Vector4 EnemyPointColor = new(1, 0, 0, 1); 
         public static Vector4 TeamPointColor = new(0, 1, 0, 1);
@@ -33,34 +33,37 @@ namespace Titled_Gui.Modules.Visual
         {
             try
             {
-                Points.Clear();
+                _points.Clear();
 
-                foreach (Entity e in GameState.Entities)
+                foreach (Entity? e in GameState.Entities)
                 {
                     if (e == null || e.Health <= 0 || e.PawnAddress == GameState.LocalPlayer.PawnAddress) continue;
 
                     float dx = GameState.LocalPlayer.Position.X - e.Position.X;
                     float dy = GameState.LocalPlayer.Position.Y - e.Position.Y;
-                    float Scale = (2.0f * RenderRange) / Proportion;
-                    float Distance = (float)Math.Sqrt(dx * dx + dy * dy) * Scale;
+                    float scale = (2.0f * RenderRange) / Proportion;
+                    float distance = (float)Math.Sqrt(dx * dx + dy * dy) * scale;
 
-                    float AngleRad = (GameState.LocalPlayer.ViewAngles.Y * (MathF.PI / 180.0f)) - (float)Math.Atan2(e.Position.Y - GameState.LocalPlayer.Position.Y, e.Position.X - GameState.LocalPlayer.Position.X);
+                    float angleRad = (GameState.LocalPlayer.ViewAngles.Y * (MathF.PI / 180.0f)) -
+                                     (float)Math.Atan2(e.Position.Y - GameState.LocalPlayer.Position.Y,
+                                         e.Position.X - GameState.LocalPlayer.Position.X);
 
-                    Vector2 PointPos;
-                    PointPos.X = (CrossPosition.X + Distance * MathF.Sin(AngleRad));
-                    PointPos.Y = (CrossPosition.Y - Distance * MathF.Cos(AngleRad));
+                    Vector2 pointPos;
+                    pointPos.X = (_crossPosition.X + distance * MathF.Sin(angleRad));
+                    pointPos.Y = (_crossPosition.Y - distance * MathF.Cos(angleRad));
 
-                    if (Distance <= RenderRange) // if theyre not visible on the radar dont draw them
-                    {
-                        if (e.Team != GameState.LocalPlayer.Team)
-                            Points.Add(new Point(PointPos, EnemyPointColor, PointType, GameState.LocalPlayer.ViewAngles.Y));
+                    if (distance >= RenderRange) // if they're not visible on the radar don't draw them
+                        continue;
 
-                        else if (e.Team == GameState.LocalPlayer.Team && DrawOnTeam)
-                            Points.Add(new Point(PointPos, TeamPointColor, PointType, GameState.LocalPlayer.ViewAngles.Y));
-                    }
+                    if (e.Team != GameState.LocalPlayer.Team)
+                        _points.Add(new Point(pointPos, EnemyPointColor, PointType,
+                            GameState.LocalPlayer.ViewAngles.Y));
+
+                    else if (e.Team == GameState.LocalPlayer.Team && DrawOnTeam)
+                        _points.Add(new Point(pointPos, TeamPointColor, PointType, GameState.LocalPlayer.ViewAngles.Y));
                 }
 
-                foreach (Point? point in Points)
+                foreach (Point? point in _points)
                 {
                     DrawPoint(point);
                 }
@@ -121,8 +124,8 @@ namespace Titled_Gui.Modules.Visual
 
         public static void DrawCross()
         {
-            GameState.renderer.drawList.AddLine(new Vector2(CrossPosition.X - 100, CrossPosition.Y), new Vector2(CrossPosition.X + 100, CrossPosition.Y), ImGui.ColorConvertFloat4ToU32(Titled_Gui.Classes.Colors.EnemyColor), 1); // enemy color because uh i felt like it
-            GameState.renderer.drawList.AddLine(new Vector2(CrossPosition.X, CrossPosition.Y - 100), new Vector2(CrossPosition.X, CrossPosition.Y + 100), ImGui.ColorConvertFloat4ToU32(Titled_Gui.Classes.Colors.EnemyColor), 1);
+            GameState.renderer.drawList.AddLine(new Vector2(_crossPosition.X - 100, _crossPosition.Y), new Vector2(_crossPosition.X + 100, _crossPosition.Y), ImGui.ColorConvertFloat4ToU32(Titled_Gui.Classes.Colors.EnemyColor), 1); // enemy color because uh i felt like it
+            GameState.renderer.drawList.AddLine(new Vector2(_crossPosition.X, _crossPosition.Y - 100), new Vector2(_crossPosition.X, _crossPosition.Y + 100), ImGui.ColorConvertFloat4ToU32(Titled_Gui.Classes.Colors.EnemyColor), 1);
         }
     }
 

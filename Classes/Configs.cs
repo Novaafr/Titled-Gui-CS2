@@ -13,8 +13,8 @@ namespace Titled_Gui.Classes
     internal class Configs : Classes.ThreadService
     {
         public static string MenuName = "Titled";
-        public static string Version = "1.4.0";
-        public static string Author = "github.com/xfi0";
+        public static string Version = "1.5.0";
+        public static string Author = "https://github.com/xfi0";
         public static string Link = "https://github.com/xfi0/Titled-Gui-CS2";
 
         public static string ConfigName = "";
@@ -90,7 +90,22 @@ namespace Titled_Gui.Classes
                         ["Y"] = BoxESP.OutlineTeamColor.Y,
                         ["Z"] = BoxESP.OutlineTeamColor.Z,
                         ["W"] = BoxESP.OutlineTeamColor.W,
-                    }
+                    },
+                    ["Occluded Enemy Color"] = new JObject
+                    {
+                        ["X"] = BoxESP.occludedEnemy.X,
+                        ["Y"] = BoxESP.occludedEnemy.Y,
+                        ["Z"] = BoxESP.occludedEnemy.Z,
+                        ["W"] = BoxESP.occludedEnemy.W,
+                    },
+                    ["Occluded Team Color"] = new JObject
+                    {
+                        ["X"] = BoxESP.occludedTeam.X,
+                        ["Y"] = BoxESP.occludedTeam.Y,
+                        ["Z"] = BoxESP.occludedTeam.Z,
+                        ["W"] = BoxESP.occludedTeam.W,
+                    },
+
                 },
                 ["Colors"] = new JObject
                 {
@@ -112,7 +127,7 @@ namespace Titled_Gui.Classes
                 },
                 ["Tracers"] = new JObject
                 {
-                    ["Tracers Enabled"] = Tracers.enableTracers,
+                    ["Tracers Enabled"] = Tracers.EnableTracers,
                     ["Tracers Thickness"] = Tracers.LineThickness,
                     ["Tracers Team Check"] = Tracers.TeamCheck,
                     ["Tracers Current Start"] = Tracers.CurrentStartPos,
@@ -161,8 +176,8 @@ namespace Titled_Gui.Classes
                 },
                 ["RCS"] = new JObject
                 {
-                    ["RCS Enabled"] = RCS.enabled,
-                    ["RCS Strength"] = RCS.strength
+                    ["RCS Enabled"] = RCS.Enabled,
+                    ["RCS Strength"] = RCS.Strength
                 },
                 ["Trigger Bot"] = new JObject
                 {
@@ -351,6 +366,17 @@ namespace Titled_Gui.Classes
                     configData["ESP"]?["Outline Team Color"]?["Y"]?.ToObject<float>() ?? BoxESP.OutlineTeamColor.Y,
                     configData["ESP"]?["Outline Team Color"]?["Z"]?.ToObject<float>() ?? BoxESP.OutlineTeamColor.Z,
                     configData["ESP"]?["Outline Team Color"]?["W"]?.ToObject<float>() ?? BoxESP.OutlineTeamColor.W
+                ); BoxESP.occludedEnemy = new Vector4(
+                    configData["ESP"]?["Outline Enemy Color"]?["X"]?.ToObject<float>() ?? BoxESP.occludedEnemy.X,
+                    configData["ESP"]?["Outline Enemy Color"]?["Y"]?.ToObject<float>() ?? BoxESP.occludedEnemy.Y,
+                    configData["ESP"]?["Outline Enemy Color"]?["Z"]?.ToObject<float>() ?? BoxESP.occludedEnemy.Z,
+                    configData["ESP"]?["Outline Enemy Color"]?["W"]?.ToObject<float>() ?? BoxESP.occludedEnemy.W
+                );
+                BoxESP.occludedTeam = new Vector4(
+                    configData["ESP"]?["Occluded Team Color"]?["X"]?.ToObject<float>() ?? BoxESP.occludedTeam.X,
+                    configData["ESP"]?["Occluded Team Color"]?["Y"]?.ToObject<float>() ?? BoxESP.occludedTeam.Y,
+                    configData["ESP"]?["Occluded Team Color"]?["Z"]?.ToObject<float>() ?? BoxESP.occludedTeam.Z,
+                    configData["ESP"]?["Occluded Team Color"]?["W"]?.ToObject<float>() ?? BoxESP.occludedTeam.W
                 );
                 #endregion
 
@@ -371,7 +397,7 @@ namespace Titled_Gui.Classes
                 #endregion
 
                 #region Tracers
-                Tracers.enableTracers = configData["Tracers"]?["Tracers Enabled"]?.ToObject<bool>() ?? Tracers.enableTracers;
+                Tracers.EnableTracers = configData["Tracers"]?["Tracers Enabled"]?.ToObject<bool>() ?? Tracers.EnableTracers;
                 Tracers.LineThickness = configData["Tracers"]?["Tracers Thickness"]?.ToObject<float>() ?? Tracers.LineThickness;
                 Tracers.TeamCheck = configData["Tracers"]?["Tracers Team Check"]?.ToObject<bool>() ?? Tracers.TeamCheck;
                 Tracers.CurrentStartPos = configData["Tracers"]?["Tracers Current Start"]?.ToObject<int>() ?? Tracers.CurrentStartPos;
@@ -418,8 +444,8 @@ namespace Titled_Gui.Classes
                 #endregion
 
                 #region RCS
-                RCS.enabled = configData["RCS"]?["RCS Enabled"]?.ToObject<bool>() ?? RCS.enabled;
-                RCS.strength = configData["RCS"]?["RCS Strength"]?.ToObject<float>() ?? RCS.strength;
+                RCS.Enabled = configData["RCS"]?["RCS Enabled"]?.ToObject<bool>() ?? RCS.Enabled;
+                RCS.Strength = configData["RCS"]?["RCS Strength"]?.ToObject<float>() ?? RCS.Strength;
                 #endregion
 
                 #region Trigger Bot

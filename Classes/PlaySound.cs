@@ -14,7 +14,7 @@ namespace Titled_Gui.Classes
         public static void PlaySoundFile(string name, float volume)
         {
             if (string.IsNullOrEmpty(name)) return;
-            string path = Path.Combine("..", "..", "..", "..", "Resources", $"{name.Trim()}.wav");
+            string path = Path.Combine(AppContext.BaseDirectory, "Resources", $"{name.Trim()}.wav");
 
             AudioFileReader file = new(path);
             WaveOutEvent player = new();

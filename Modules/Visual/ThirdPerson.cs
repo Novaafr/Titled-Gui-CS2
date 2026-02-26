@@ -12,22 +12,23 @@ namespace Titled_Gui.Modules.Visual
         private static IntPtr cachedlp;
         static IntPtr jnePatch = 0x7E3697;
         static byte[] originalJNE = { 0x75, 0x10 }; // something idk
+        static byte[] patchedJNE = { 0xEB, 0x10 };
+        public static void Run(IntPtr currentPawn)
         {
             if (NeedsReapply(currentPawn))
             {
-                enabled = false;
                 cachedlp = currentPawn;
             }
 
+            if (enabled)
             {
                 ApplyPatch();
                 SetThirdPersonState(true);
-                enabled = true;
             }
+            else if (!enabled)
             {
                 SetThirdPersonState(false);
                 RemovePatch();
-                enabled = false;
             }
         }
 
@@ -35,9 +36,8 @@ namespace Titled_Gui.Modules.Visual
         {
             if (patchApplied)
                 return;
-            
-            //Console.WriteLine("Applying Patch");
-             GameState.swed.WriteBytes(GameState.client + jnePatch, patchedJNE);
+
+            GameState.swed.WriteBytes(GameState.client + jnePatch, patchedJNE);
             patchApplied = true;
         }
 
@@ -45,7 +45,6 @@ namespace Titled_Gui.Modules.Visual
         {
             if (!patchApplied)
                 return;
-            //Console.WriteLine("Removing Patch");
 
             GameState.swed.WriteBytes(GameState.client + jnePatch, originalJNE);
             patchApplied = false;
@@ -53,7 +52,7 @@ namespace Titled_Gui.Modules.Visual
 
         private static void SetThirdPersonState(bool enabled)
         {
-             GameState.swed.WriteBool(GameState.client + Offsets.dwCSGOInput + 0x251, enabled);
+            GameState.swed.WriteBool(GameState.client + Offsets.dwCSGOInput + 0x251, enabled);
         }
 
         private static bool NeedsReapply(IntPtr currentPawn)
@@ -65,6 +64,7 @@ namespace Titled_Gui.Modules.Visual
         {
             if (!enabled) return;
 
+            ThirdPerson.Run(GameState.LocalPlayerPawn);
         }
     }
 }

@@ -35,9 +35,9 @@ namespace Titled_Gui.Modules.Visual
         public static bool EnableESPPreview = true;
         public static Vector4 occludedEnemy = new(1, 1, 0, 1);
         public static Vector4 occludedTeam = new(0, 0, 1, 1);
-        public static void DrawBoxESP(Entity entity, Entity localPlayer, Renderer renderer)
+        public static void DrawBoxESP(Entity? entity, Entity localPlayer, Renderer renderer)
         {
-            if (!EnableESP || entity == null || (TeamCheck && entity.Team == localPlayer.Team) || entity.PawnAddress == GameState.LocalPlayer.PawnAddress || FlashCheck && GameState.LocalPlayer.IsFlashed || entity?.Bones2D?.Count < 0 || entity?.Bones2D == null || entity.Position2D == new Vector2(-99, -99)) return;
+            if (!EnableESP || entity == null || (TeamCheck && entity.Team == localPlayer.Team) || entity.PawnAddress == GameState.LocalPlayer.PawnAddress || (FlashCheck && GameState.LocalPlayer.IsFlashed) || entity?.Bones2D?.Count < 0 || entity?.Bones2D == null || entity.Position2D == new Vector2(-99, -99)) return;
 
             try
             {
@@ -259,7 +259,7 @@ namespace Titled_Gui.Modules.Visual
             if (NameDisplay.Enabled)
                 NameDisplay.DrawNamePreview(center + new Vector2(70, -100));
 
-            if (Tracers.enableTracers)
+            if (Tracers.EnableTracers)
                 Tracers.DrawTracerPreview(center);
         }
 
@@ -356,7 +356,7 @@ namespace Titled_Gui.Modules.Visual
             }
         }
 
-        public static (Vector2 TopLeft, Vector2 BottomRight, Vector2 TopRight, Vector2 BottomLeft, Vector2 BottomMiddle)? GetBoxRect(Entity entity)
+        public static (Vector2 TopLeft, Vector2 BottomRight, Vector2 TopRight, Vector2 BottomLeft, Vector2 BottomMiddle)? GetBoxRect(Entity? entity)
         {
             if (entity == null || entity.Position2D == Vector2.Zero || entity.ViewPosition2D == Vector2.Zero)
                 return null;

@@ -67,7 +67,7 @@ namespace Titled_Gui.Modules.Visual
             style.Colors[(int)ImGuiCol.HeaderActive] = accentColor;
             Vector2 windowSize = new(240f, 100f);
             ImGui.SetNextWindowSize(windowSize, ImGuiCond.Once); // ensure that the like size doesnt reset to the defualt on resize
-            ImGui.SetNextWindowPos(new Vector2((GameState.renderer.screenSize.X - windowSize.X) / 2, 10));
+            ImGui.SetNextWindowPos(new Vector2((GameState.renderer.ScreenSize.X - windowSize.X) / 2, 10));
             ImGui.Begin(BombPlanted ? "C4 Has Been Planted" : "C4 Has Not Been Planted", ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar);
            
             ImDrawListPtr imDrawList = ImGui.GetWindowDrawList();

@@ -46,14 +46,7 @@ namespace Titled_Gui.Modules.Rage
                 int indexHigh = (crosshairEnt & 0x7FFF) >> 9;
                 int indexLow = (crosshairEnt & EntityIndexMask);
 
-                IntPtr entityList = GameState.swed.ReadPointer(GameState.client + Offsets.dwEntityList);
-                if (entityList == IntPtr.Zero)
-                {
-                    ClearTargetState();
-                    entityList = GameState.EntityList; // fallback, may not work
-                    return;
-                }
-                IntPtr entityEntry = GameState.swed.ReadPointer(entityList, EntityListMultiplier * indexHigh + EntityEntryOffset);
+                IntPtr entityEntry = GameState.swed.ReadPointer(GameState.EntityList, EntityListMultiplier * indexHigh + EntityEntryOffset);
                 if (entityEntry == IntPtr.Zero)
                 {
                     ClearTargetState();
@@ -66,11 +59,11 @@ namespace Titled_Gui.Modules.Rage
                     return;
                 }
 
-                int EntityTeam = GameState.swed.ReadInt(entityPtr + Offsets.m_iTeamNum);
-                int Health = GameState.swed.ReadInt(entityPtr + Offsets.m_iHealth);
-                int LifeState = GameState.swed.ReadInt(entityPtr + Offsets.m_lifeState);
+                int entityTeam = GameState.swed.ReadInt(entityPtr + Offsets.m_iTeamNum);
+                int health = GameState.swed.ReadInt(entityPtr + Offsets.m_iHealth);
+                int lifeState = GameState.swed.ReadInt(entityPtr + Offsets.m_lifeState);
                 
-                if ((TeamCheck && GameState.LocalPlayer.Team == EntityTeam) || entityPtr == IntPtr.Zero || entityEntry == IntPtr.Zero || entityList == IntPtr.Zero || Health == 0 || GameState.LocalPlayer.Health == 0 || LifeState != 256)
+                if ((TeamCheck && GameState.LocalPlayer.Team == entityTeam) || entityPtr == IntPtr.Zero || entityEntry == IntPtr.Zero || GameState.EntityList == IntPtr.Zero || health == 0 || GameState.LocalPlayer.Health == 0 || lifeState != 256)
                 {
                     ClearTargetState();
                     return;

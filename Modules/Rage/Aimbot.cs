@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Numerics;
 using Titled_Gui.Classes;
 using Titled_Gui.Data.Entity;
@@ -17,7 +19,7 @@ namespace Titled_Gui.Modules.Rage
         public static Vector4 FovColor = new(1f, 0f, 0f, 1f);
         public static bool DrawFov = true;
         public static int AimbotKey = 0x04; // mmb
-        public static string[] Bones = ["Head", "Neck", "Right Sholder", "Left Sholder", "Waist", "Random"];
+        public static string[] Bones = ["Head", "Neck", "Right Shoulder", "Left Shoulder", "Waist", "Random"];
         public static int CurrentBone = 0;
         public static int CurrentBoneIndex = 2;
         public static Vector3 CurrentBoneV3 = Vector3.Zero;
@@ -25,7 +27,7 @@ namespace Titled_Gui.Modules.Rage
         public static int CurrentAimMethod = 0;
         public static float SmoothingX = 5f;
         public static float SmoothingY = 5f;
-        private static bool FlashCheck = false; 
+        private static bool FlashCheck = false;
         public static bool ScopedOnly = false;
         public static bool UseFOV = true;
         public static Random random = new();
@@ -36,14 +38,15 @@ namespace Titled_Gui.Modules.Rage
         {
             try
             {
-                if (!AimbotEnable || Entities == null || GameState.LocalPlayer.Health == 0 || (ScopedOnly && !GameState.LocalPlayer.IsScoped) || (FlashCheck && GameState.LocalPlayer.IsFlashed)) { RandomChosen = false; return; }
-                if (((User32.GetAsyncKeyState(AimbotKey) & 0x8000) != 0))
+                if (!AimbotEnable || Entities.Count == 0 || GameState.LocalPlayer.Health == 0 || (ScopedOnly && !GameState.LocalPlayer.IsScoped) || (FlashCheck && GameState.LocalPlayer.IsFlashed)) { RandomChosen = false; return; }
+                
+                if ((User32.GetAsyncKeyState(AimbotKey) & 0x8000) != 0)
                 {
                     target = GetTarget();
 
                     if (target == null) return;
 
-                    Vector2 screenCenter = new(GameState.renderer.screenSize.X / 2, GameState.renderer.screenSize.Y / 2);
+                    Vector2 screenCenter = new(GameState.renderer.ScreenSize.X / 2, GameState.renderer.ScreenSize.Y / 2);
                     Vector3 playerView = LocalPlayer.Origin + LocalPlayer.View;
                     Vector2 newAngles;
 
@@ -103,52 +106,57 @@ namespace Titled_Gui.Modules.Rage
                     if (float.IsNaN(newAngles.X) || float.IsNaN(newAngles.Y))
                         return;
 
-                switch (CurrentAimMethod)
-                {
-                    case 0: // mouse
-                        {
-                            Vector2 newAngles2D = (target != null && target.Bones2D != null  &&
-                            CurrentBoneIndex < target.Bones2D.Count && target.Bones2D[CurrentBoneIndex] != Vector2.Zero) 
-                            ? target.Bones2D[CurrentBoneIndex] : target?.Position2D ?? Vector2.Zero; // holy ts is long
-                            
-                            int dx = (int)(newAngles2D.X - screenCenter.X);
-                            int dy = (int)(newAngles2D.Y - screenCenter.Y);
+                    Vector2 newAngles2D =
+                        (target != null && target.Bones2D != null
+                        && CurrentBoneIndex < target.Bones2D.Count && target.Bones2D[CurrentBoneIndex] != Vector2.Zero)
+                        ? target.Bones2D[CurrentBoneIndex] : target?.Position2D ?? Vector2.Zero; // holy ts is long
 
+                    int dx = (int)(newAngles2D.X - screenCenter.X);
+                    int dy = (int)(newAngles2D.Y - screenCenter.Y);
+                    MoveMousePos(dx, dy);
+                }
+                else
+                    target = null;
+
+            }
+            catch (DivideByZeroException divideByZeroException)
+            {
+                Console.WriteLine("Aimbot divide by zero exception: " + divideByZeroException);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Aimbot exception: " + ex);
             }
         }
         private static void MoveMousePos(int dx, int dy)
         {
             if (SmoothingX > 0)
                 dx = (int)(dx / SmoothingX);
-            else
-                dx = (int)(dx / 1);
 
             if (SmoothingY > 0)
                 dy = (int)(dy / SmoothingY);
-            else
-                dy = (int)(dy / 1);
-
+          
             MoveMouse.MouseMove(dx, dy);
         }
-        public static void DrawCircle(int size, Vector4 color) 
+        public static void DrawCircle(int size, Vector4 circleColor)
         {
-            Vector4 circleColor = color; 
-            float radius = size; 
-            GameState.renderer.drawList.AddCircle(new Vector2(GameState.renderer.screenSize.X / 2, GameState.renderer.screenSize.Y / 2), radius, ImGui.ColorConvertFloat4ToU32(circleColor), 32, 1.0f); // draw circle  
+            float radius = size;
+            GameState.renderer.drawList.AddCircle(new Vector2(GameState.renderer.ScreenSize.X / 2, GameState.renderer.ScreenSize.Y / 2), radius, ImGui.ColorConvertFloat4ToU32(circleColor), 32, 1.0f); // draw circle  
         }
         public static Entity? GetTarget() // aimbot function was getting long
         {
             try
             {
-                if (Entities == null) return null;
+                if (Entities.Count == 0) 
+                    return null;
 
-                Vector2 screenCenter = new(GameState.renderer.screenSize.X / 2, GameState.renderer.screenSize.Y / 2);
+                Vector2 screenCenter = new(GameState.renderer.ScreenSize.X / 2, GameState.renderer.ScreenSize.Y / 2);
                 Entity? bestTarget = null;
                 float closestDist = float.MaxValue;
-             
-                foreach (var entity in Entities)
+
+                foreach (Entity? entity in Entities)
                 {
-                    if (entity.Position2D == new Vector2(-99, -99) || entity.Head2D == new Vector2(-99, -99) || entity.Health == 0 || (!Team && entity.Team == GameState.LocalPlayer.Team) || (VisibilityCheck && !entity.Visible)) continue;
+                    if (entity == null || entity.Position2D == new Vector2(-99, -99) || entity.Head2D == new Vector2(-99, -99) || entity.Health == 0 || (!Team && entity.Team == GameState.LocalPlayer.Team) || (VisibilityCheck && !entity.Visible)) continue;
 
                     float distToBody = Vector2.Distance(screenCenter, entity.Position2D);
                     float distToHead = Vector2.Distance(screenCenter, entity.Head2D);
@@ -177,7 +185,7 @@ namespace Titled_Gui.Modules.Rage
         {
             if (target == null) return;
 
-            GameState.renderer.drawList.AddLine(new(GameState.renderer.screenSize.X / 2, GameState.renderer.screenSize.Y / 2), target.Position2D, ImGui.ColorConvertFloat4ToU32(FovColor));
+            GameState.renderer.drawList.AddLine(new(GameState.renderer.ScreenSize.X / 2, GameState.renderer.ScreenSize.Y / 2), target.Position2D, ImGui.ColorConvertFloat4ToU32(FovColor));
         }
 
         protected override void FrameAction()

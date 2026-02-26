@@ -72,7 +72,7 @@ namespace Titled_Gui.Data.Game
             return GameState.swed.ReadFloat((nint)(address + IntervalPerTick2Offset));
         }
 
-        public static float GetcurrentTime()
+        public static float GetCurrentTime()
         {
             Update();
             if (address == 0) return -1;
@@ -80,7 +80,7 @@ namespace Titled_Gui.Data.Game
             return GameState.swed.ReadFloat((nint)(address + CurrentTimeOffset));
         }
 
-        public static float GetcurrentTime2()
+        public static float GetCurrentTime2()
         {
             Update();
             if (address == 0) return -1;

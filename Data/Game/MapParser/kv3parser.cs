@@ -40,7 +40,7 @@ namespace PhysExtractor.src
                 {
                     if (part.IsArray)
                     {
-                        if (current is Dictionary<string, object> dict && dict.TryGetValue(part.Key, out object arrayValue))
+                        if (current is Dictionary<string, object> dict && dict.TryGetValue(part.Key, out object? arrayValue))
                         {
                             if (arrayValue is List<object> list && part.Index < list.Count)
                             {
@@ -58,7 +58,7 @@ namespace PhysExtractor.src
                     }
                     else
                     {
-                        if (current is Dictionary<string, object> dict && dict.TryGetValue(part.Key, out object value))
+                        if (current is Dictionary<string, object> dict && dict.TryGetValue(part.Key ?? "", out object? value))
                         {
                             current = value;
                         }

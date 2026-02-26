@@ -10,7 +10,7 @@ namespace Titled_Gui.Classes
         public static Vector4 Rgb(float speed1)
         {
             float time = (float)DateTime.Now.TimeOfDay.TotalSeconds;
-            float speed = (float)(Math.Sin(time * Math.PI) + 1) / 2; // ocelate or how ever you spell it
+            float speed = (MathF.Sin(time * MathF.PI) + 1) / 2;
 
             float r, g, b;
 

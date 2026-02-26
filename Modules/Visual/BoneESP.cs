@@ -14,8 +14,8 @@ namespace Titled_Gui.Modules.Visual
         public static bool EnableBoneESP = false;
         public static bool TeamCheck = false;
         public static Vector4 BoneColor = new(1f, 1f, 1f, 1f);
-        public static Vector4 visibleBoneColor = new(1f, 1f, 1f, 1f);
-        public static Vector4 occludedBoneColor = new(0f, 0f, 1f, 1f);
+        public static Vector4 VisibleBoneColor = new(1f, 1f, 1f, 1f);
+        public static Vector4 OccludedBoneColor = new(0f, 0f, 1f, 1f);
         public static float GlowAmount = 0f;
         public static string[] Types = ["Straight", "Beizer"];
         public static int CurrentType = 0;
@@ -51,11 +51,18 @@ namespace Titled_Gui.Modules.Visual
             KneeRight = 26,
             FeetRight = 27,
         }
-        public static void DrawBoneLines(Data.Entity.Entity entity, Renderer renderer)
-        {
-            if (!EnableBoneESP || entity == null || entity.Bones2D == null || (TeamCheck && entity.Team == GameState.LocalPlayer.Team) || entity.PawnAddress == GameState.LocalPlayer.PawnAddress || entity.Bones == null || entity.Health == 0 || BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed || entity.Position2D == new Vector2(-99, -99)) return; 
 
-            float thickness = Math.Clamp(BoneThickness / (entity.Distance * 0.1f), 0.5f, 1f); // calculate thickness based on Distance, minimum 0.5f and maximum 2f stops it from being massive
+        public static void DrawBoneLines(Entity? entity, Renderer renderer)
+        {
+            if (!EnableBoneESP || entity == null || entity.Bones2D == null ||
+                (TeamCheck && entity.Team == GameState.LocalPlayer.Team) ||
+                entity.PawnAddress == GameState.LocalPlayer.PawnAddress || entity.Bones == null || entity.Health == 0 ||
+                (BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed) ||
+                entity.Position2D == new Vector2(-99, -99)) return;
+
+            float thickness =
+                Math.Clamp(BoneThickness / (entity.Distance * 0.1f), 0.5f,
+                    1f); // calculate thickness based on Distance, minimum 0.5f and maximum 2f stops it from being massive
             uint boneColor = ImGui.GetColorU32(Colors.RGB ? Colors.Rgb(0.5f) : BoneColor); //get color
 
             foreach (var (a, b) in BoneConnections)
@@ -69,15 +76,16 @@ namespace Titled_Gui.Modules.Visual
                 {
                     //if (Classes.VisibilityCheck.BVH.VisibleBone(entity.Bones[a]) && Classes.VisibilityCheck.BVH.VisibleBone(entity.Bones[b]))
                     //{
-                        //renderer.drawList.AddLine(boneA, boneB, ImGui.ColorConvertFloat4ToU32(visibleBoneColor), thickness);
-                        //Console.WriteLine("thing a");
+                    //renderer.drawList.AddLine(boneA, boneB, ImGui.ColorConvertFloat4ToU32(visibleBoneColor), thickness);
+                    //Console.WriteLine("thing a");
                     //}
                     //else
                     //{
-                        //renderer.drawList.AddLine(boneA, boneB, ImGui.ColorConvertFloat4ToU32(occludedBoneColor), thickness);
-                        //Console.WriteLine("thing b");
+                    //renderer.drawList.AddLine(boneA, boneB, ImGui.ColorConvertFloat4ToU32(occludedBoneColor), thickness);
+                    //Console.WriteLine("thing b");
                     //}
                 }
+
                 if (IsValidScreenPoint(boneA) && IsValidScreenPoint(boneB))
                 {
                     float boneLength = Vector2.Distance(boneA, boneB);
@@ -87,11 +95,18 @@ namespace Titled_Gui.Modules.Visual
                         switch (CurrentType)
                         {
                             case 0:
-                                DrawHelpers.DrawGlowLine(renderer.drawList, boneA, boneB, BoneColor, GlowAmount, ThickNess: thickness);
-                                DrawHelpers.DrawGlowCircle(renderer.drawList, boneA, thickness * 2, BoneColor, GlowAmount);
+                                DrawHelpers.DrawGlowLine(renderer.drawList, boneA, boneB, BoneColor, GlowAmount,
+                                    ThickNess: thickness);
+                                DrawHelpers.DrawGlowCircle(renderer.drawList, boneA, thickness * 2, BoneColor,
+                                    GlowAmount);
                                 break;
                             case 1:
-                                DrawHelpers.DrawGlowBezier(renderer.drawList, boneB, (boneB + boneA) * 0.5f + Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * curve, (boneB + boneA) * 0.5f + Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * (curve * 0.5f), boneA, BoneColor, GlowAmount / 2, thickness);
+                                DrawHelpers.DrawGlowBezier(renderer.drawList, boneB,
+                                    (boneB + boneA) * 0.5f +
+                                    Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * curve,
+                                    (boneB + boneA) * 0.5f +
+                                    Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) *
+                                    (curve * 0.5f), boneA, BoneColor, GlowAmount / 2, thickness);
                                 break;
                         }
                     }
@@ -99,28 +114,37 @@ namespace Titled_Gui.Modules.Visual
                     switch (CurrentType)
                     {
                         case 0:
-                            renderer.drawList.AddLine(boneA, boneB, boneColor, thickness); //draw a line between the Bones
-                            renderer.drawList.AddCircleFilled(boneA, thickness * 1.5f, boneColor); //draw a circle at the start bone
+                            renderer.drawList.AddLine(boneA, boneB, boneColor,
+                                thickness); //draw a line between the Bones
+                            renderer.drawList.AddCircleFilled(boneA, thickness * 1.5f,
+                                boneColor); //draw a circle at the start bone
                             break;
                         case 1:
-                            renderer.drawList.AddBezierCubic(boneB, (boneB + boneA) * 0.5f + Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * curve, (boneB + boneA) * 0.5f + Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * (curve * 0.5f), boneA, boneColor, thickness);
+                            renderer.drawList.AddBezierCubic(boneB,
+                                (boneB + boneA) * 0.5f +
+                                Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * curve,
+                                (boneB + boneA) * 0.5f +
+                                Vector2.Normalize(new Vector2(-(boneA - boneB).Y, (boneA - boneB).X)) * (curve * 0.5f),
+                                boneA, boneColor, thickness);
                             break;
                     }
                 }
             }
 
-            Vector2 HeadPos = entity.Bones2D[2];
-            if (IsValidScreenPoint(HeadPos))
-            {
-                float radius = Math.Clamp(10f / (entity.Distance * 0.05f), 3f, 10f);
+            Vector2 headPos = entity.Bones2D[2];
+            if (!IsValidScreenPoint(headPos))
+                return;
 
-                if (GlowAmount > 0)
-                    DrawHelpers.DrawGlowCircle(renderer.drawList, HeadPos, radius, BoneColor, GlowAmount);
-                if (entity.Visible)
-                    renderer.drawList.AddCircleFilled(HeadPos, radius, boneColor); // draw a circle at the Head bone extra big
-                else
-                    renderer.drawList.AddCircleFilled(HeadPos, radius, ImGui.ColorConvertFloat4ToU32(new(1, 0, 0, 1)));
-            }
+            float radius = Math.Clamp(10f / (entity.Distance * 0.05f), 3f, 10f);
+
+            if (GlowAmount > 0)
+                DrawHelpers.DrawGlowCircle(renderer.drawList, headPos, radius, BoneColor, GlowAmount);
+            if (entity.Visible)
+                renderer.drawList.AddCircleFilled(headPos, radius,
+                    boneColor); // draw a circle at the Head bone extra big
+            else
+                renderer.drawList.AddCircleFilled(headPos, radius, ImGui.ColorConvertFloat4ToU32(new(1, 0, 0, 1)));
+
         }
 
         public static bool IsValidScreenPoint(Vector2 pt)

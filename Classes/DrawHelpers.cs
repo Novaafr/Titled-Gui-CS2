@@ -15,12 +15,12 @@ namespace Titled_Gui.Classes
         {
             for (int i = 1; i <= layers; i++)
             {
-                float Expansion = glowAmount * i;
+                float expansion = glowAmount * i;
                 float alpha = color.W * MathF.Exp(-i * 0.6f);
                 var glowColor = new Vector4(color.X, color.Y, color.Z, alpha);
 
-                var glowTop = new Vector2(rectTop.X - Expansion, rectTop.Y - Expansion);
-                var glowBottom = new Vector2(rectBottom.X + Expansion, rectBottom.Y + Expansion);
+                var glowTop = new Vector2(rectTop.X - expansion, rectTop.Y - expansion);
+                var glowBottom = new Vector2(rectBottom.X + expansion, rectBottom.Y + expansion);
 
                 drawList.AddRect(glowTop, glowBottom, ImGui.ColorConvertFloat4ToU32(glowColor), rounding);
             }
@@ -29,12 +29,12 @@ namespace Titled_Gui.Classes
         {
             for (int i = 1; i <= layers; i++)
             {
-                float Expansion = glowAmount * i;
+                float expansion = glowAmount * i;
                 float alpha = color.W * MathF.Exp(-i * 0.6f);
                 var glowColor = new Vector4(color.X, color.Y, color.Z, alpha);
 
-                var glowTop = new Vector2(rectTop.X - Expansion, rectTop.Y - Expansion);
-                var glowBottom = new Vector2(rectBottom.X + Expansion, rectBottom.Y + Expansion);
+                var glowTop = new Vector2(rectTop.X - expansion, rectTop.Y - expansion);
+                var glowBottom = new Vector2(rectBottom.X + expansion, rectBottom.Y + expansion);
 
                 drawList.AddRectFilled(glowTop, glowBottom, ImGui.ColorConvertFloat4ToU32(glowColor), rounding);
             }
@@ -144,24 +144,12 @@ namespace Titled_Gui.Classes
                 drawList.AddQuadFilled(new Vector2(p1.X - expansion, p1.Y - expansion), new Vector2(p2.X + expansion, p2.Y - expansion), new Vector2(p3.X + expansion, p3.Y + expansion), new Vector2(p4.X - expansion, p4.Y + expansion), ImGui.ColorConvertFloat4ToU32(glowColor));
             }
         }
-        public static void MakeFloatGoWOO(ref float Value, out float OutValue)
+        public static void AnimateFloat(ref float value, out float outValue)
         {
-            Value += 0.1f;
-
-            if (Value >= 1.0f)
-            {
-                Value = 1.0f;
-                OutValue = Value;
-                return;
-            }
-            else if (Value <= 0.0f)
-            {
-                Value = 0.0f;
-                OutValue = Value;
-                return;
-            }
-            OutValue = Value;
-      
+            value += 0.1f;
+            value = Math.Clamp(value, 0.0f, 1.0f);
+            outValue = value;
+            return;
         }
     }
 }

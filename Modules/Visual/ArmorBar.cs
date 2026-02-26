@@ -15,17 +15,17 @@ namespace Titled_Gui.Modules.Visual
         public static float ArmorBarWidth = 5f;
         public static float Rounding = 2.3f;
         public static Vector4 ArmorColor = new(0.1f, 0f, 1f, 1f);
-        public static void DrawArmorBar(Renderer renderer, float Armor, float MaxArmor, Vector2 topRight, float height, Entity e)
+        public static void DrawArmorBar(Entity e, Renderer renderer, float Armor, float MaxArmor, Vector2 topRight, float height)
         {
-            if (!EnableArmorhBar || (!TeamCheck && e.Team == GameState.LocalPlayer.Team) || e == null || BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed || e.Armor < 1) return;
+            if (!EnableArmorhBar || e == null || (!TeamCheck && e.Team == GameState.LocalPlayer.Team) || (BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed) || e.Armor < 1) return;
 
-            float HealthPercentage = Math.Clamp(Armor / MaxArmor, 0f, 1f); // like percentage of box to be filled
-            float filledHeight = height * HealthPercentage;
+            float healthPercentage = Math.Clamp(Armor / MaxArmor, 0f, 1f); // like percentage of box to be filled
+            float filledHeight = height * healthPercentage;
 
             renderer.drawList.AddRectFilled(topRight, topRight + new Vector2(ArmorBarWidth, height), ImGui.ColorConvertFloat4ToU32(new(0.2f, 0.2f, 0.2f, 1f)), Rounding);
 
             Vector2 filledTop = topRight + new Vector2(0, height - filledHeight);
-            ArmorColor = Colors.RGB ? Colors.Rgb(HealthPercentage) : new(0.1f, 0f, 1f, 1f);
+            ArmorColor = Colors.RGB ? Colors.Rgb(healthPercentage) : new(0.1f, 0f, 1f, 1f);
 
             renderer.drawList.AddRectFilled(filledTop, filledTop + new Vector2(ArmorBarWidth, filledHeight), ImGui.ColorConvertFloat4ToU32(ArmorColor), Rounding);
         }

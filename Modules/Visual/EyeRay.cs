@@ -15,25 +15,26 @@ namespace Titled_Gui.Modules.Visual
         {
             try
             {
-                foreach (Entity e in GameState.Entities)
+                foreach (Entity? e in GameState.Entities)
                 {
-                    if (e == null || e.Bones2D == null || !DrawOnTeam && e.Team == GameState.LocalPlayer.Team || BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed) return;
+                    if (e == null || e.Bones2D == null || (!DrawOnTeam && e.Team == GameState.LocalPlayer.Team) || (BoxESP.FlashCheck && GameState.LocalPlayer.IsFlashed)) 
+                        continue;
 
-                    Vector2 Head = e.Bones2D[2];
+                    Vector2 head = e.Bones2D[2];
 
-                    float Yaw = e.AngEyeAngles.Y * (MathF.PI / 180.0f);
+                    float yaw = e.AngEyeAngles.Y * (MathF.PI / 180.0f);
 
-                    float dx = MathF.Cos(Yaw) * Length;
-                    float dy = -MathF.Sin(Yaw) * Length;
+                    float dx = MathF.Cos(yaw) * Length;
+                    float dy = -MathF.Sin(yaw) * Length;
 
 
-                    float ClampedLength = Math.Clamp(Length, 0.3f, 0.6f); 
+                    float clampedLength = Math.Clamp(Length, 0.3f, 0.6f); 
 
-                    Vector2 End = new(Head.X + dx * ClampedLength, Head.Y + dy * ClampedLength);
+                    Vector2 end = new(head.X + dx * clampedLength, head.Y + dy * clampedLength);
 
-                    if (End == new Vector2(-99, -99)) continue;
+                    if (end == new Vector2(-99, -99)) continue;
 
-                    GameState.renderer.drawList.AddLine(Head, End, ImGui.ColorConvertFloat4ToU32(EyeRayColor));
+                    GameState.renderer.drawList.AddLine(head, end, ImGui.ColorConvertFloat4ToU32(EyeRayColor));
                     //Console.WriteLine("DRAWING" + Head + " " + End);
                 }
             }

@@ -19,7 +19,8 @@ namespace Titled_Gui.Modules.Visual
         public static IntPtr GetPlanted()
         {
             IntPtr plantedPointer = GameState.swed.ReadPointer(GameState.client + Offsets.dwPlantedC4);
-            if (plantedPointer == IntPtr.Zero) return IntPtr.Zero;
+            if (plantedPointer == IntPtr.Zero) 
+                return plantedPointer == IntPtr.Zero ? IntPtr.Zero : plantedPointer;
 
             return GameState.swed.ReadPointer(plantedPointer);
         }

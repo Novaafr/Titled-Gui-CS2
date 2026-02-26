@@ -12,12 +12,12 @@ namespace Titled_Gui.Modules.Visual
 {
     internal class SoundESP // TODO: animate and optimize
     {
-        public static bool enabled = false;
-        public static Vector4 teamColor = new(0, 1, 0, 1);
-        public static Vector4 enemyColor = new(1, 0, 0, 1);
-        private static Dictionary<Entity, float> emitTimes = []; // entity, emittime, timesincestart
+        public static bool Enabled = false;
+        public static Vector4 TeamColor = new(0, 1, 0, 1);
+        public static Vector4 EnemyColor = new(1, 0, 0, 1);
+        private static readonly Dictionary<Entity, float> emitTimes = []; // entity, emittime, timesincestart
 
-        private class point
+        private class Point
         {
             public Vector2 Position { get; set; }
             public float StartTime { get; set; }
@@ -25,7 +25,7 @@ namespace Titled_Gui.Modules.Visual
         }
         public static void DrawSoundESP(Entity e)
         {
-            if (!enabled || e == null || e.Health <= 0) return;
+            if (!Enabled || e == null || e.Health <= 0) return;
 
             if (!emitTimes.ContainsKey(e) || e.emitSoundTime > emitTimes[e])
             {
@@ -36,13 +36,13 @@ namespace Titled_Gui.Modules.Visual
                 return;
 
             //Console.WriteLine(e.emitSoundTime);
-            List<point> points = CreatePoints(e);
+            List<Point> points = CreatePoints(e);
 
             AnimateAndDrawPoints(points, e);
         }
-        private static List<point> CreatePoints(Entity e)
+        private static List<Point> CreatePoints(Entity e)
         {
-            List<point> points = new();
+            List<Point> points = new();
             float radius = 7f;
             float step = MathF.PI * 2 / 64;
             float[] viewMatrix = GameState.swed.ReadMatrix(GameState.client + Offsets.dwViewMatrix);
@@ -54,7 +54,7 @@ namespace Titled_Gui.Modules.Visual
 
                 if (point2D == new Vector2(-99, -99)) continue;
 
-                points.Add(new point
+                points.Add(new Point
                 {
                     Position = point2D,
                     StartTime = e.emitSoundTime,
@@ -65,7 +65,7 @@ namespace Titled_Gui.Modules.Visual
             return points;
         }
 
-        private static void AnimateAndDrawPoints(List<point> points, Entity e)
+        private static void AnimateAndDrawPoints(List<Point> points, Entity e)
         {
             foreach (var point in points)
             {
@@ -73,7 +73,7 @@ namespace Titled_Gui.Modules.Visual
 
                 float scale = elapsedTime;
 
-                uint color = ImGui.ColorConvertFloat4ToU32(new Vector4(teamColor.X, teamColor.Y, teamColor.Z, 1));
+                uint color = ImGui.ColorConvertFloat4ToU32(new Vector4(TeamColor.X, TeamColor.Y, TeamColor.Z, 1));
                 Vector2 tempPoint2D = point.Position;
                 List<Vector2> scaledPoints = [.. points.Select(p =>
                 {
@@ -86,7 +86,7 @@ namespace Titled_Gui.Modules.Visual
                 {
                     fixed (Vector2* pointPtr = pointArray)
                     {
-                        GameState.renderer.drawList.AddPolyline(ref *pointPtr, points.Count, ImGui.ColorConvertFloat4ToU32(teamColor), ImDrawFlags.Closed, 2f);
+                        GameState.renderer.drawList.AddPolyline(ref *pointPtr, points.Count, ImGui.ColorConvertFloat4ToU32(TeamColor), ImDrawFlags.Closed, 2f);
                     }
                 }
             }

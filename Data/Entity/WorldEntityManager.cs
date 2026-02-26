@@ -11,12 +11,12 @@ namespace Titled_Gui.Data.Entity
     public class WorldEntityManager : ThreadService
     {
         private static IntPtr listEntry = IntPtr.Zero;
-        private static Dictionary<string, string> EntityType = new() {
+        private static readonly Dictionary<string, string> EntityType = new() {
             {"chicken", "Chicken"},
             {"hostage_entity", "Hostage"}
         };
 
-        private static Dictionary<string, string> ProjectilesType = new() {
+        private static readonly Dictionary<string, string> ProjectilesType = new() {
             {"smokegrenade_projectile", "Smoke Grenade"},
             {"flashbang_projectile", "Flashbang"},
             {"hegrenade_projectile", "HE Grenade"},
@@ -25,7 +25,7 @@ namespace Titled_Gui.Data.Entity
             {"decoy_projectile", "Decoy Grenade"}
         };
 
-        private static Dictionary<string, string> WeaponsType = new(){
+        private static readonly Dictionary<string, string> WeaponsType = new(){
             {"weapon_ak47", "AK-47"},
             {"weapon_m4a1", "M4A1"},
             {"weapon_awp", "AWP"},
@@ -72,7 +72,7 @@ namespace Titled_Gui.Data.Entity
         };
         public enum EntityKind 
         { 
-            Unknown,
+            Unknown = 0,
             Weapon, 
             Projectile, 
             Chicken, 
@@ -122,7 +122,8 @@ namespace Titled_Gui.Data.Entity
                     continue;
 
                 WorldEntity worldEntity = PopulateEntity(item);
-                if (worldEntity.position2D == new Vector2(-99, -99) || worldEntity == null || worldEntity.pawnAddress == 0x0) continue;
+                if (worldEntity.Position2D == new Vector2(-99, -99) || worldEntity == null || worldEntity.PawnAddress == 0x0) 
+                    continue;
 
                 worldEntities.Add(worldEntity);
             }
@@ -145,35 +146,32 @@ namespace Titled_Gui.Data.Entity
            
             WorldEntity newWorldEntity = new()
             {
-                pawnAddress = worldEntity,
-                itemNode = itemNode,
-                position = itemOrigin,
-                position2D = Calculate.WorldToScreen(viewMatrix, itemOrigin),
+                PawnAddress = worldEntity,
+                ItemNode = itemNode,
+                Position = itemOrigin,
+                Position2D = Calculate.WorldToScreen(viewMatrix, itemOrigin),
+                DisplayName = "",
+                Type = EntityKind.Unknown
             };
-            if (WeaponsType.TryGetValue(type, out var wepName))
+            if (WeaponsType.TryGetValue(type, out var weaponName))
             {
-                newWorldEntity.type = EntityKind.Weapon;
-                newWorldEntity.displayName = wepName;
+                newWorldEntity.Type = EntityKind.Weapon;
+                newWorldEntity.DisplayName = weaponName;
             }
-            else if (ProjectilesType.TryGetValue(type, out var projName))
+            else if (ProjectilesType.TryGetValue(type, out var projectileName))
             {
-                newWorldEntity.type = EntityKind.Projectile;
-                newWorldEntity.displayName = projName;
+                newWorldEntity.Type = EntityKind.Projectile;
+                newWorldEntity.DisplayName = projectileName;
             }
             else if (type.Contains("chicken"))
             {
-                newWorldEntity.type = EntityKind.Chicken;
-                newWorldEntity.displayName = "Chicken";
+                newWorldEntity.Type = EntityKind.Chicken;
+                newWorldEntity.DisplayName = "Chicken";
             }
             else if (type.Contains("hostage_entity"))
             {
-                newWorldEntity.type = EntityKind.Hostage;
-                newWorldEntity.displayName = "Hostage";
-            }
-            else
-            {
-                newWorldEntity.type = EntityKind.Unknown;
-                newWorldEntity.displayName = string.Empty;
+                newWorldEntity.Type = EntityKind.Hostage;
+                newWorldEntity.DisplayName = "Hostage";
             }
 
             return newWorldEntity;

@@ -24,8 +24,8 @@ namespace Titled_Gui.Classes
             float screenY = matrix[1 * 4 + 0] * pos.X + matrix[1 * 4 + 1] * pos.Y + matrix[1 * 4 + 2] * pos.Z + matrix[1 * 4 + 3];
 
             // perspective division 
-            float halfW = GameState.renderer.screenSize.X * 0.5f;
-            float halfH = GameState.renderer.screenSize.Y * 0.5f;
+            float halfW = GameState.renderer.ScreenSize.X * 0.5f;
+            float halfH = GameState.renderer.ScreenSize.Y * 0.5f;
 
             float X = halfW + (screenX / view) * halfW;
             float Y = halfH - (screenY / view) * halfH;
@@ -57,27 +57,27 @@ namespace Titled_Gui.Classes
         public static List<Vector3> ReadBones(nint boneAddress)
         {
             byte[] boneBytes = GameState.swed.ReadBytes(boneAddress, 27 * 32 + 16);
-            List<Vector3> Bones = [];
+            List<Vector3> bones = [];
             foreach (var boneId in Enum.GetValues<BoneIds>())
             {
                 float x = BitConverter.ToSingle(boneBytes, (int)boneId * 32 + 0);
                 float y = BitConverter.ToSingle(boneBytes, (int)boneId * 32 + 4);
                 float z = BitConverter.ToSingle(boneBytes, (int)boneId * 32 + 8);
                 Vector3 currentBone = new(x, y, z);
-                Bones.Add(currentBone);
+                bones.Add(currentBone);
             }
-            return Bones;
+            return bones;
         }
 
-        public static List<Vector2> ReadBones2D(List<Vector3> Bones, float[] ViewMatrix, Vector2 screenSize)
+        public static List<Vector2> ReadBones2D(List<Vector3> bones, float[] viewMatrix, Vector2 screenSize)
         {
-            List<Vector2> Bones2d = [];
-            foreach (Vector3 bone in Bones)
+            List<Vector2> bones2d = [];
+            foreach (Vector3 bone in bones)
             {
-                Vector2 bone2d = WorldToScreen(ViewMatrix, bone);
-                Bones2d.Add(bone2d);
+                Vector2 bone2d = WorldToScreen(viewMatrix, bone);
+                bones2d.Add(bone2d);
             }
-            return Bones2d;
+            return bones2d;
         }
     }
 }

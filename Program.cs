@@ -1,6 +1,7 @@
 ﻿using Datamodel;
 using ImGuiNET;
 using Swed64;
+using System.Diagnostics;
 using System.Numerics;
 using Titled_Gui;
 using Titled_Gui.Classes;
@@ -12,15 +13,14 @@ try
 {
     if (GameState.swed == null) return;
     // initialization
-    EntityManager entityManager = new();
     await OffsetGetter.UpdateOffsetsAsync();
 
+    EntityManager entityManager = new();
     ImGui.CreateContext();
     Renderer.LoadFonts();
     Thread renderThread = new(() => GameState.renderer.Start().Wait())
     {
         IsBackground = true,
-        
     };
     renderThread.Start();
     // entities
@@ -33,7 +33,7 @@ try
             {
                 if (entityManager != null)
                 {
-                    entities = entityManager?.GetEntities();
+                    entities = EntityManager.GetEntities();
                     Entity localPlayer = EntityManager.GetLocalPlayer();
 
                     GameState.LocalPlayer = localPlayer;

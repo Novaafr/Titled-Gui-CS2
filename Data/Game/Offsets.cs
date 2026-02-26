@@ -1,18 +1,18 @@
 ﻿namespace Titled_Gui.Data.Game
 {
-    public class Offsets 
+    public class Offsets
     {
-        public static int m_pCameraServices = 0x11E0; 
-        public static int m_iFOV = 0x210; 
-        public static int m_bIsScoped = 0x23E8; 
-        public static int m_iHealth = 0x344; 
-        public static int m_entitySpottedState = 0x1B58; 
-        public static int m_bSpotted = 0x8; 
-        public static int m_iIDEntIndex = 0x1458; 
-        public static int m_pSceneNode = 0x8; 
-        public static int dwViewMatrix = 0x1A6D260; 
+        public static int m_pCameraServices = 0x11E0;
+        public static int m_iFOV = 0x210;
+        public static int m_bIsScoped = 0x23E8;
+        public static int m_iHealth = 0x344;
+        public static int m_entitySpottedState = 0x1B58;
+        public static int m_bSpotted = 0x8;
+        public static int m_iIDEntIndex = 0x1458;
+        public static int m_pSceneNode = 0x8;
+        public static int dwViewMatrix = 0x1A6D260;
         public static int m_vecViewOffset = 0xCB0;
-        public static int dwViewAngles = 0x1A774D0; 
+        public static int dwViewAngles = 0x1A774D0;
         public static int m_lifeState = 0x348;
         public static int m_vOldOrigin = 0x1324;
         public static int m_iTeamNum = 0x3E3;
@@ -71,5 +71,41 @@
         public static int m_bInBombZone = 0x0;
         public static int m_vecAbsOrigin = 0x0;
         public static int m_GunGameImmunityColor = 0x0;
+        public static int m_flEmitSoundTime = 0x0;
+        public static int m_vecMins = 0x0;
+        public static int m_vecMaxs = 0x0;
+        public static int m_vecOrigin = 0x0;
+        public static int m_angRotation = 0x0;
+        public static int v_angle = 0x0;
+        public static int m_Collision = 0x0;
+        public static int m_CHitboxComponent = 0x0;
+        public static int m_bDormant = 0x0;
+        public static int m_CommandContext = 0x600;
+        public static int m_nInButtonsWhichAreToggles = 0x6A8;
+        //public static int m_nTickBase = 0x6B0;
+        //public static int m_hPawn = 0x6B4;
+        //public static int m_bKnownTeamMismatch = 0x6B8;
+        //public static int m_hPredictedPawn = 0x6BC;
+        //public static int m_nSplitScreenSlot = 0x6C0;
+        //public static int m_hSplitOwner = 0x6C4;
+        //public static int m_hSplitScreenPlayers = 0x6C8;
+        //public static int m_bIsHLTV = 0x6E0;
+        //public static int m_iConnected = 0x6E4;
+        //public static int m_steamID = 0x770;
+        //public static int m_bIsLocalPlayerController = 0x778; 
+        //public static int m_bNoClipEnabled = 0x779;
+        //public static int m_iDesiredFOV = 0x77C;
+        public static int m_nSmokeEffectTickBegin = 0x1468;
+        public static int m_bDidSmokeEffect = 0x146C;
+        public static int m_nRandomSeed = 0x1470;
+        public static int m_vSmokeColor = 0x1474;
+        public static int m_vSmokeDetonationPos = 0x1480;
+        public static int m_VoxelFrameData = 0x1490;
+        public static int m_nVoxelFrameDataSize = 0x14A8;
+        public static int m_nVoxelUpdate = 0x14AC;
+        public static int m_bSmokeVolumeDataReceived = 0x14B0;
+        public static int m_bSmokeEffectSpawned = 0x14B1;
+        public static int m_pEntity = 0x10;
+        public static int m_designerName = 0x10;
     }
 }

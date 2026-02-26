@@ -14,7 +14,7 @@ namespace Titled_Gui.Data.Game
         public static IntPtr CameraServices { get; set; } // camera services pointer
         public static uint CurrentFov { get; set; } = 60; // default FOV
         public static IntPtr currentPawn { get; set; } // get current pawn pointer
-        public static List<Entity.Entity> Entities { get; set; } = [];
+        public static List<Entity.Entity?> Entities { get; set; } = [];
         public static Entity.Entity LocalPlayer { get; set; } = new Entity.Entity(); // local player entity
         public static IntPtr BoneMatrix { get; set; } // bone matrix pointer
         public static IntPtr GameSceneNode { get; set; } // scene node pointer
@@ -37,6 +37,6 @@ namespace Titled_Gui.Data.Game
         public static int roundKills { get; set; }
         public static int RoundDamage { get; set; }
         public static IntPtr bulletServices { get; set; }
-        public static List<WorldEntity> worldEntities { get; set; } = [];
+        public static List<WorldEntity?> worldEntities { get; set; } = [];
     }
 }

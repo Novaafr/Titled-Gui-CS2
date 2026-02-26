@@ -24,7 +24,12 @@ namespace Titled_Gui.Modules.Legit
             public Vector2 BasePosition { get; set; } 
             public float State { get; set; } = 0f;
         }
-        public static readonly List<HitText> Texts = new();
+        public enum HitAnimation
+        {
+            Sin = 0,
+            Fade = 1,
+        }
+        public static readonly List<HitText> Texts = [];
 
         public static void Update()
         {
@@ -41,7 +46,7 @@ namespace Titled_Gui.Modules.Legit
             }
             if (GameState.RoundHeadshots > PreviousHeadshots)
             {
-                Vector2 TextPos = new Vector2(GameState.renderer.screenSize.X / 2, GameState.renderer.screenSize.Y / 2);
+                Vector2 TextPos = new Vector2(GameState.renderer.ScreenSize.X / 2, GameState.renderer.ScreenSize.Y / 2);
                 Texts.Add(new HitText
                 {
                     Text = "HEADSHOT",
@@ -55,11 +60,12 @@ namespace Titled_Gui.Modules.Legit
 
         private static void PlaySound(string soundName)
         {
-            if (string.IsNullOrEmpty(soundName)) return;
+            if (string.IsNullOrEmpty(soundName)) 
+                return;
 
             try
             {
-                string path = Path.Combine("..", "..", "..", "..", "Resources", $"{soundName.Replace(" ", "")}.wav");
+                string path = Path.Combine("Resources", $"{soundName.Replace(" ", "")}.wav");
 
                 AudioFileReader file = new(path);
                 WaveOutEvent player = new();

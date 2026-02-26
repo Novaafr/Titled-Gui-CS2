@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using Titled_Gui.Data.Game;
 
@@ -7,7 +8,9 @@ namespace Titled_Gui.Classes
     internal class OffsetGetter
     {
         private static readonly Dictionary<string, int> offsets = []; // holds the resolved offsets
-        private static HttpClient httpClient = new();
+        private static readonly HttpClient httpClient = new();
+        private static string _offsetRegex = @"public const nint ([\w\+]+) = (0x[0-9A-Fa-f]+);";
+
         static OffsetGetter() 
         {
             try
@@ -40,6 +43,7 @@ namespace Titled_Gui.Classes
             public string Name { get; } = name;
             public string? ClassName { get; } = className;
         }
+
 
         private static readonly Dictionary<string, List<Offset>> FieldNameMappings = new()
         {
@@ -105,6 +109,19 @@ namespace Titled_Gui.Classes
             { "m_iShotsFired", new() { new Offset("m_iShotsFired") } },
             { "m_vecAbsOrigin", new() { new Offset("m_vecAbsOrigin") } },
             { "m_GunGameImmunityColor", new() { new Offset("m_GunGameImmunityColor") } },
+            { "m_flEmitSoundTime", new() { new Offset("m_flEmitSoundTime") } },
+            { "m_vecMins", new() { new Offset("m_vecMins") } },
+            { "m_vecMaxs", new() { new Offset("m_vecMaxs") } },
+            { "v_angle", new() { new Offset("v_angle") } },
+            { "m_Collision", new() { new Offset("m_Collision") } },
+            { "m_CHitboxComponent", new() { new Offset("m_CHitboxComponent") } },
+            { "m_bDormant", new() { new Offset("m_bDormant") } },
+            { "m_nSmokeEffectTickBegin", new() { new Offset("m_nSmokeEffectTickBegin") } },
+            { "m_pEntity", new() { new Offset("m_pEntity") } },
+            { "m_designerName", new() { new Offset("m_designerName") } },
+            { "m_bSmokeEffectSpawned", new() { new Offset("m_bSmokeEffectSpawned") } },
+            { "m_bSmokeVolumeDataReceived", new() { new Offset("m_bSmokeVolumeDataReceived") } },
+            { "m_nVoxelUpdate", new() { new Offset("m_nVoxelUpdate") } },
 
             // EXPLICIT CLASS THING
             { "m_pActionTrackingServices", new() { new Offset("m_pActionTrackingServices", "CCSPlayerController") } },
@@ -140,7 +157,7 @@ namespace Titled_Gui.Classes
 
                 Console.WriteLine($"[OFFSET FINDER] Found: {offsets.Count}");
                 UpdateOffsetsClass();
-                if (GameState.swed.ReadPointer(GameState.client, Offsets.dwViewMatrix) == IntPtr.Zero)
+                if (GameState.swed.ReadPointer(GameState.client, Offsets.dwViewMatrix) == IntPtr.Zero || GameState.swed.ReadPointer(GameState.client, Offsets.dwEntityList) == IntPtr.Zero)
                 {
                     Console.WriteLine("[OFFSET FINDER] ERROR: a2x didnt NOT update correctly, trying secondary source");
                     offsets.Clear();
@@ -188,7 +205,7 @@ namespace Titled_Gui.Classes
         private static void ParseOffsetsFile(string content)
         {
             // regex to match the offsets (global constants)
-            var matches = Regex.Matches(content, @"public (?:const|static) nint (\w+) = (0x[0-9A-Fa-f]+);");
+            var matches = Regex.Matches(content, _offsetRegex);
             Console.WriteLine($"[OFFSET FINDER] Found {matches.Count} Offsets In File offsets.cs");
 
             foreach (Match match in matches)
@@ -204,7 +221,7 @@ namespace Titled_Gui.Classes
             ParseClassOffsets(content, "C_BaseEntity");
 
             // regex fallback for any extra global consts
-            var matches = Regex.Matches(content, @"public (?:const|static) nint (\w+) = (0x[0-9A-Fa-f]+);");
+            var matches = Regex.Matches(content, _offsetRegex);
             Console.WriteLine($"[OFFSET FINDER] Found {matches.Count} additional offsets in client_dll.cs");
 
             foreach (Match match in matches)
@@ -229,7 +246,7 @@ namespace Titled_Gui.Classes
                 return;
             }
 
-            var matches = Regex.Matches(classMatch.Groups[1].Value, @"public const nint (\w+) = (0x[0-9A-Fa-f]+);");
+            var matches = Regex.Matches(classMatch.Groups[1].Value, _offsetRegex);
 
             Console.WriteLine($"[OFFSET FINDER] Found {matches.Count} offsets in class {className}");
 
@@ -244,7 +261,7 @@ namespace Titled_Gui.Classes
         private static void ParseButtonsFile(string content)
         {
             // regex to match the offsets
-            var matches = Regex.Matches(content, @"public const nint ([\w\+]+) = (0x[0-9A-Fa-f]+);");
+            var matches = Regex.Matches(content, _offsetRegex);
             Console.WriteLine($"[OFFSET FINDER] Found {matches.Count} Offsets In File buttons.cs");
 
             foreach (Match match in matches)
@@ -258,7 +275,7 @@ namespace Titled_Gui.Classes
         private static void ParseEngine2File(string content)
         {
             // regex to match the offsets
-            var matches = Regex.Matches(content, @"public const nint ([\w\+]+) = (0x[0-9A-Fa-f]+);");
+            var matches = Regex.Matches(content, _offsetRegex);
             Console.WriteLine($"[OFFSET FINDER] Found {matches.Count} Offsets In File engine2.cs");
 
             foreach (Match match in matches)
@@ -271,7 +288,7 @@ namespace Titled_Gui.Classes
 
         private static void UpdateOffsetsClass()
         {
-            // grab your static Offsets class
+            // grab the static Offsets class
             Type offsetsType = typeof(Titled_Gui.Data.Game.Offsets);
             FieldInfo[] fields = offsetsType.GetFields(BindingFlags.Public | BindingFlags.Static);
 
@@ -280,7 +297,7 @@ namespace Titled_Gui.Classes
             {
                 string fieldName = field.Name;
 
-                if (FieldNameMappings.TryGetValue(fieldName, out List<Offset>? sources))
+                if (FieldNameMappings.TryGetValue(fieldName.Trim(), out List<Offset>? sources))
                 {
                     bool found = false;
                     foreach (var source in sources)
@@ -290,18 +307,19 @@ namespace Titled_Gui.Classes
                             ParseClassOffsets(ClientDllContent, source.ClassName);
                         }
 
-                        if (offsets.TryGetValue(source.Name, out int value))
-                        {
-                            int? currentValue = (int?)field?.GetValue(null);
-                            field?.SetValue(null, value);
+                        if (!offsets.TryGetValue(source.Name, out int value))
+                            continue;
 
-                            Console.WriteLine($"[OFFSET FINDER] Updated {fieldName} From 0x{currentValue:X} To 0x{value:X} (Source: {source.Name}, Class: {source.ClassName ?? "global"})");
-                            updatedCount++;
-                            found = true;
-                            break;
-                        }
+                        int? currentValue = (int?)field?.GetValue(null);
+                        field?.SetValue(null, value);
+
+                        Console.WriteLine(
+                            $"[OFFSET FINDER] Updated {fieldName} From 0x{currentValue:X} To 0x{value:X} (Source: {source.Name}, Class: {source.ClassName ?? "global"})");
+                        updatedCount++;
+                        found = true;
+                        break;
                     }
-                  
+
                     if (!found)
                     {
                         Console.WriteLine($"[OFFSET FINDER] ERROR: No Offset Found {fieldName} (Tried: {string.Join(", ", sources.Select(s => s.Name))})");
