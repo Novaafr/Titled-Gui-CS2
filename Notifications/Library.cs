@@ -13,7 +13,7 @@ namespace Titled_Gui.Notifications
             Console.WriteLine("\nLoading notis once.");
             ImGui.Begin("Titled_NotificationHud");
 
-            GameState.renderer.drawList.AddRectFilled(new Vector2(50, 150), new Vector2(50, 150), 7);
+            GameState.renderer.drawList.AddRectFilled(new Vector2(50, 150), new Vector2(50, 150), ImGui.ColorConvertFloat4ToU32(new Vector4(128, 0, 0, 255)));
 
             ImGui.Text(NotificationText);
 
