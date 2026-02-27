@@ -19,7 +19,8 @@
 
 ## 🌐 Community
 <div align="center">
-![Discord](https://discord.gg/SXV8Bmy4Tt)
+  
+![Discord](https://discord.gg/SXV8Bmy4Tt/)
 </div>
 
 <hr></hr>
