@@ -16,12 +16,14 @@
 <p align="center">⭐Please, star this repo if you enjoyed it!⭐</p>
 
 <hr></hr>
+
 ## 🌐 Community
 <div align="center">
 ![Discord](https://discord.gg/SXV8Bmy4Tt)
 </div>
 
 <hr></hr>
+
 ## 📖 Licensing
 This project is licensed under GPL Public V3, More information in LICENSE
 **TL;DR:** You may use this source code only if your project is also open source and licensed under GPL v3.0.
