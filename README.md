@@ -17,11 +17,8 @@
 
 <hr></hr>
 
-## 🌐 Community
-<div align="center">
-  
+## 🌐 Community  
 ![Discord](https://invidget.switchblade.xyz/SXV8Bmy4Tt)
-</div>
 
 <hr></hr>
 
