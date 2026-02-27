@@ -19,7 +19,6 @@
 
 ## 🌐 Community  
 ![Discord](https://invidget.switchblade.xyz/SXV8Bmy4Tt)
-
 <hr></hr>
 
 ## 📖 Licensing
