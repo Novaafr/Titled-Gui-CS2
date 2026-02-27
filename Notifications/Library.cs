@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using System.Numerics;
+using Titled_Gui.Data.Game;
 
 namespace Titled_Gui.Notifications
 {
@@ -10,6 +12,8 @@ namespace Titled_Gui.Notifications
         {
             Console.WriteLine("\nLoading notis once.");
             ImGui.Begin("Titled_NotificationHud");
+
+            GameState.renderer.drawList.AddRectFilled(new Vector2(50, 150), new Vector2(50, 150), 7);
 
             ImGui.Text(NotificationText);
 
